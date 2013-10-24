@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <CheckBoxPreference android:defaultValue="true"/>
-	
+
+	<CheckBoxPreference
+		android:defaultValue="true"
+		android:key="@string/pref_enable_notifications"
+		android:title="@string/enable_notifications" />
+	<com.derekjass.jacksonutilitysubmitter.TimePreference
+		android:key="@string/pref_notification_time"
+		android:title="@string/notification_time"
+		android:defaultValue="720" />
 
 </PreferenceScreen>

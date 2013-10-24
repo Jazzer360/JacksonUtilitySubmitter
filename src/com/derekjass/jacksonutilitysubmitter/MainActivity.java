@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.EditText;
@@ -43,7 +44,6 @@ public class MainActivity extends ActionBarActivity {
 		waterText = (EditText) findViewById(R.id.waterEditText);
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-//		prefs = getSharedPreferences(PrefKeys.FILE, MODE_PRIVATE);
 
 		String name = prefs.getString(PrefKeys.NAME, null);
 		String address = prefs.getString(PrefKeys.ADDRESS, null);
@@ -63,6 +63,16 @@ public class MainActivity extends ActionBarActivity {
 		MenuInflater mi = getMenuInflater();
 		mi.inflate(R.menu.activity_main_menu, menu);
 		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			startActivity(new Intent(this, SettingsActivity.class));
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
@@ -99,11 +109,11 @@ public class MainActivity extends ActionBarActivity {
 				new String[]{getString(R.string.email_address)});
 		i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
 		i.putExtra(Intent.EXTRA_TEXT, getMessageBody());
-	
+
 		PackageManager pm = getPackageManager();
 		List<ResolveInfo> activities = pm.queryIntentActivities(i, 0);
 		boolean isIntentSafe = activities.size() > 0;
-	
+
 		if (isIntentSafe) {
 			startActivityForResult(i, SUBMITTAL_REQUEST);
 		} else {

@@ -11,8 +11,4 @@ public final class PrefKeys {
 	/** Key for storing a Long value representing the last submittal time */
 	static final String LAST_SUBMIT =
 			"com.derekjass.jacksonutilitysubmitter.LAST_SUBMIT";
-	
-	/** The String for the preference file */
-	static final String FILE =
-			"com.derekjass.jacksonutilitysubmitter.PREFS";
 }

@@ -8,82 +8,57 @@ import android.view.View;
 import android.widget.TimePicker;
 
 public class TimePreference extends DialogPreference {
-	private int lastHour = 0;
-	private int lastMinute = 0;
+
+	private static final int DEFAULT_TIME = 720;
+
+	private int time;
 	private TimePicker picker = null;
-
-	public static int getHour(String time) {
-		String[] pieces=time.split(":");
-
-		return(Integer.parseInt(pieces[0]));
-	}
-
-	public static int getMinute(String time) {
-		String[] pieces=time.split(":");
-
-		return(Integer.parseInt(pieces[1]));
-	}
 
 	public TimePreference(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
 
-		setPositiveButtonText("Set");
-		setNegativeButtonText("Cancel");
+		setPositiveButtonText(android.R.string.ok);
+		setNegativeButtonText(android.R.string.cancel);
 	}
 
 	@Override
 	protected View onCreateDialogView() {
 		picker = new TimePicker(getContext());
 
-		return(picker);
+		return picker;
 	}
 
 	@Override
 	protected void onBindDialogView(View v) {
 		super.onBindDialogView(v);
 
-		picker.setCurrentHour(lastHour);
-		picker.setCurrentMinute(lastMinute);
+		picker.setCurrentHour(time / 60);
+		picker.setCurrentMinute(time % 60);
 	}
 
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
-		super.onDialogClosed(positiveResult);
-
 		if (positiveResult) {
-			lastHour = picker.getCurrentHour();
-			lastMinute = picker.getCurrentMinute();
+			time = picker.getCurrentHour() * 60;
+			time += picker.getCurrentMinute();
 
-			String time=String.valueOf(lastHour)+":"+String.valueOf(lastMinute);
-
-			if (callChangeListener(time)) {
-				persistString(time);
-			}
+			persistInt(time);
 		}
 	}
 
 	@Override
 	protected Object onGetDefaultValue(TypedArray a, int index) {
-		return(a.getString(index));
+		return(a.getInteger(index, DEFAULT_TIME));
 	}
 
 	@Override
 	protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-		String time=null;
-
 		if (restoreValue) {
-			if (defaultValue==null) {
-				time=getPersistedString("00:00");
-			}
-			else {
-				time=getPersistedString(defaultValue.toString());
-			}
+			time = this.getPersistedInt(DEFAULT_TIME);
 		}
 		else {
-			time=defaultValue.toString();
+			time = (Integer) defaultValue;
+			persistInt(time);
 		}
-
-		lastHour=getHour(time);
-		lastMinute=getMinute(time);
 	}
 }

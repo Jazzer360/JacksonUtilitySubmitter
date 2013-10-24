@@ -16,5 +16,7 @@
 	<string name="settings">Settings</string>
 	<string name="submittal_failed">Submission failed.</string>
 	<string name="submittal_succeeded">Submission successful.</string>
+	<string name="enable_notifications">Enable notifications</string>
+	<string name="notification_time">Notification time</string>
 
 </resources>
