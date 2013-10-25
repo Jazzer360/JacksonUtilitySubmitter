@@ -21,8 +21,6 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
-	private static final int SUBMITTAL_REQUEST = 1;
-
 	private EditText nameText;
 	private EditText addressText;
 	private EditText electricText;
@@ -89,21 +87,6 @@ public class MainActivity extends ActionBarActivity {
 		prefsEditor.commit();
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent data) {
-		if (requestCode == SUBMITTAL_REQUEST) {
-			if (resultCode == RESULT_OK) {
-				saveSubmittalTime();
-				showToast(R.string.submittal_succeeded);
-			} else {
-				showToast(R.string.submittal_failed);
-			}
-		}
-
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
 	public void submitReadings(View v) {
 		Intent i = new Intent(Intent.ACTION_SEND);
 		i.setType("message/rfc822");
@@ -117,7 +100,8 @@ public class MainActivity extends ActionBarActivity {
 		boolean isIntentSafe = activities.size() > 0;
 
 		if (isIntentSafe) {
-			startActivityForResult(i, SUBMITTAL_REQUEST);
+			saveSubmittalTime();
+			startActivity(i);
 		} else {
 			showToast(R.string.error_no_email_client);
 		}
