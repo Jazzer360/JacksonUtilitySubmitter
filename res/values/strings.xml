@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-	<string name="app_name">Jackson Utility Submitter</string>
+	<string name="app_name">Jackson Utility Submitter</string>
 	<string name="name">Name:</string>
 	<string name="name_hint">Ex. John Doe</string>
 	<string name="address">Address:</string>
