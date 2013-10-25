@@ -12,7 +12,7 @@ public class TimePreference extends DialogPreference {
 	private static final int DEFAULT_TIME = 720;
 
 	private int time;
-	private TimePicker picker = null;
+	private TimePicker picker;
 
 	public TimePreference(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
@@ -59,6 +59,18 @@ public class TimePreference extends DialogPreference {
 		else {
 			time = (Integer) defaultValue;
 			persistInt(time);
+		}
+	}
+
+	private void setTimeSummary(int time) {
+		StringBuilder summary = new StringBuilder();
+		boolean isPm = time >= 720 ? true : false;
+
+		if (picker.is24HourView()) {
+			summary.append(time / 60);
+		} else {
+			int t = time / 60;
+			summary.append(isPm ? t - 12 : t);
 		}
 	}
 }
