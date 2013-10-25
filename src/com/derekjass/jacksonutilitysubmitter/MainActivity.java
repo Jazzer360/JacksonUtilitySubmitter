@@ -45,8 +45,10 @@ public class MainActivity extends ActionBarActivity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		String name = prefs.getString(PrefKeys.NAME, null);
-		String address = prefs.getString(PrefKeys.ADDRESS, null);
+		String name = prefs.getString(
+				getString(R.string.pref_name), null);
+		String address = prefs.getString(
+				getString(R.string.pref_address), null);
 
 		if (!TextUtils.isEmpty(name)) {
 			nameText.setText(name);
@@ -80,10 +82,10 @@ public class MainActivity extends ActionBarActivity {
 		super.onPause();
 
 		SharedPreferences.Editor prefsEditor = prefs.edit();
-		prefsEditor.putString(
-				PrefKeys.NAME, nameText.getText().toString());
-		prefsEditor.putString(
-				PrefKeys.ADDRESS, addressText.getText().toString());
+		prefsEditor.putString(getString(R.string.pref_name),
+				nameText.getText().toString());
+		prefsEditor.putString(getString(R.string.pref_address),
+				addressText.getText().toString());
 		prefsEditor.commit();
 	}
 
@@ -140,7 +142,8 @@ public class MainActivity extends ActionBarActivity {
 
 	private void saveSubmittalTime() {
 		SharedPreferences.Editor prefsEditor = prefs.edit();
-		prefsEditor.putLong(PrefKeys.LAST_SUBMIT, System.currentTimeMillis());
+		prefsEditor.putLong(getString(R.string.pref_last_submit),
+				System.currentTimeMillis());
 		prefsEditor.commit();
 	}
 

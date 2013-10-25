@@ -9,7 +9,7 @@ import android.widget.TimePicker;
 
 public class TimePreference extends DialogPreference {
 
-	private static final int DEFAULT_TIME = 720;
+	static final int DEFAULT_TIME = 720;
 
 	private int time;
 	private TimePicker picker;
@@ -24,6 +24,7 @@ public class TimePreference extends DialogPreference {
 	@Override
 	protected View onCreateDialogView() {
 		picker = new TimePicker(getContext());
+		picker.setIs24HourView(false);
 
 		return picker;
 	}
@@ -43,6 +44,8 @@ public class TimePreference extends DialogPreference {
 			time += picker.getCurrentMinute();
 
 			persistInt(time);
+
+			setTimeSummary(time);
 		}
 	}
 
@@ -52,25 +55,34 @@ public class TimePreference extends DialogPreference {
 	}
 
 	@Override
-	protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-		if (restoreValue) {
+	protected void onSetInitialValue(boolean restoreVal, Object defaultVal) {
+		if (restoreVal) {
 			time = this.getPersistedInt(DEFAULT_TIME);
 		}
 		else {
-			time = (Integer) defaultValue;
+			time = (Integer) defaultVal;
 			persistInt(time);
 		}
+
+		setTimeSummary(time);
 	}
 
 	private void setTimeSummary(int time) {
 		StringBuilder summary = new StringBuilder();
-		boolean isPm = time >= 720 ? true : false;
+		int hours = time / 60;
+		int minutes = time % 60;
 
-		if (picker.is24HourView()) {
-			summary.append(time / 60);
+		if (hours == 0) {
+			summary.append(12);
+		} else if (hours > 12) {
+			summary.append(hours - 12);
 		} else {
-			int t = time / 60;
-			summary.append(isPm ? t - 12 : t);
+			summary.append(hours);
 		}
+
+		summary.append(":").append(String.format("%02d", minutes));
+		summary.append(hours >= 12 ? " PM" : " AM");
+
+		setSummary(summary.toString());
 	}
 }

@@ -12,10 +12,12 @@ import android.preference.PreferenceManager;
 
 public class SetAlarmReceiver extends BroadcastReceiver {
 
-	SharedPreferences prefs;
+	private SharedPreferences prefs;
+	private Context context;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		this.context = context;
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		AlarmManager alarmManager =
@@ -25,11 +27,24 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 		PendingIntent pi = PendingIntent.getBroadcast(
 				context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		alarmManager.set(AlarmManager.RTC, getAlarmTime(), pi);
+		boolean notificationsEnabled = prefs.getBoolean(
+				context.getString(R.string.pref_enable_notifications),
+				true);
+
+		if (notificationsEnabled) {
+			alarmManager.set(AlarmManager.RTC, getAlarmTime(), pi);
+		} else {
+			alarmManager.cancel(pi);
+		}
 	}
 
 	private long getAlarmTime() {
-		long lastSubmit = prefs.getLong(PrefKeys.LAST_SUBMIT, 0);
+		long lastSubmit = prefs.getLong(
+				context.getString(R.string.pref_last_submit),
+				0);
+		int notifTime = prefs.getInt(
+				context.getString(R.string.pref_notification_time),
+				TimePreference.DEFAULT_TIME);
 
 		Calendar c = Calendar.getInstance();
 		if (lastSubmit != 0) {
@@ -39,10 +54,12 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 		c.add(Calendar.MONTH, 1);
 
 		c.set(Calendar.DAY_OF_MONTH, 1);
-		c.set(Calendar.HOUR_OF_DAY, 12);
+		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
+
+		c.add(Calendar.MINUTE, notifTime);
 
 		while (c.getTimeInMillis() < System.currentTimeMillis()) {
 			c.add(Calendar.DAY_OF_MONTH, 1);
