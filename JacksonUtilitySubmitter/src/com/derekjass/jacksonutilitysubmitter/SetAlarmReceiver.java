@@ -18,6 +18,7 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		this.context = context;
+		PreferenceManager.setDefaultValues(context, R.xml.preferences, false);
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		AlarmManager alarmManager =
@@ -44,7 +45,13 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 				0);
 		int notifTime = prefs.getInt(
 				context.getString(R.string.pref_notification_time),
-				TimePreference.DEFAULT_TIME);
+				720);
+
+		if (lastSubmit == 0) {
+			prefs.edit().putLong(
+					context.getString(R.string.pref_last_submit),
+					System.currentTimeMillis()).commit();
+		}
 
 		Calendar c = Calendar.getInstance();
 		if (lastSubmit != 0) {
