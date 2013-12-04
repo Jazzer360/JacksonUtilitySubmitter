@@ -1,6 +1,5 @@
 package com.derekjass.jacksonutilitysubmitter;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import android.content.Intent;
@@ -15,46 +14,44 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
-	private EditText nameText;
-	private EditText addressText;
-	private EditText electricText;
-	private EditText waterText;
+	private EditText mNameText;
+	private EditText mAddressText;
+	private EditText mElectricText;
+	private EditText mWaterText;
 
-	private SharedPreferences prefs;
+	private SharedPreferences mPrefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		enableActionBarOverflow();
 		setContentView(R.layout.activity_main);
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
 
-		nameText = (EditText) findViewById(R.id.nameEditText);
-		addressText = (EditText) findViewById(R.id.addressEditText);
-		electricText = (EditText) findViewById(R.id.electricEditText);
-		waterText = (EditText) findViewById(R.id.waterEditText);
+		mNameText = (EditText) findViewById(R.id.nameEditText);
+		mAddressText = (EditText) findViewById(R.id.addressEditText);
+		mElectricText = (EditText) findViewById(R.id.electricEditText);
+		mWaterText = (EditText) findViewById(R.id.waterEditText);
 
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		String name = prefs.getString(
+		String name = mPrefs.getString(
 				getString(R.string.pref_name), null);
-		String address = prefs.getString(
+		String address = mPrefs.getString(
 				getString(R.string.pref_address), null);
 
 		if (!TextUtils.isEmpty(name)) {
-			nameText.setText(name);
-			addressText.requestFocus();
+			mNameText.setText(name);
+			mAddressText.requestFocus();
 		}
 		if (!TextUtils.isEmpty(address)) {
-			addressText.setText(address);
-			electricText.requestFocus();
+			mAddressText.setText(address);
+			mElectricText.requestFocus();
 		}
 	}
 
@@ -70,6 +67,7 @@ public class MainActivity extends ActionBarActivity {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -79,11 +77,11 @@ public class MainActivity extends ActionBarActivity {
 	protected void onPause() {
 		super.onPause();
 
-		SharedPreferences.Editor prefsEditor = prefs.edit();
+		SharedPreferences.Editor prefsEditor = mPrefs.edit();
 		prefsEditor.putString(getString(R.string.pref_name),
-				nameText.getText().toString());
+				mNameText.getText().toString());
 		prefsEditor.putString(getString(R.string.pref_address),
-				addressText.getText().toString());
+				mAddressText.getText().toString());
 		prefsEditor.commit();
 	}
 
@@ -103,49 +101,33 @@ public class MainActivity extends ActionBarActivity {
 			saveSubmittalTime();
 			startActivity(i);
 		} else {
-			showToast(R.string.error_no_email_client);
+			Toast.makeText(this,
+					R.string.error_no_email_client,
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	private String getMessageBody() {
 		StringBuilder body = new StringBuilder();
-		body.append(nameText.getText());
+		body.append(mNameText.getText());
 		body.append("\n");
-		body.append(addressText.getText());
+		body.append(mAddressText.getText());
 		body.append("\n\n");
 		body.append(getString(R.string.electric));
 		body.append(" ");
-		body.append(electricText.getText());
+		body.append(mElectricText.getText());
 		body.append("\n");
 		body.append(getString(R.string.water));
 		body.append(" ");
-		body.append(waterText.getText());
+		body.append(mWaterText.getText());
 
 		return body.toString();
 	}
 
 	private void saveSubmittalTime() {
-		SharedPreferences.Editor prefsEditor = prefs.edit();
+		SharedPreferences.Editor prefsEditor = mPrefs.edit();
 		prefsEditor.putLong(getString(R.string.pref_last_submit),
 				System.currentTimeMillis());
 		prefsEditor.commit();
-	}
-
-	private void showToast(int resId) {
-		Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
-	}
-
-	private void enableActionBarOverflow() {
-		try {
-			ViewConfiguration config = ViewConfiguration.get(this);
-			Field menuKeyField = ViewConfiguration.class
-					.getDeclaredField("sHasPermanentMenuKey");
-			if(menuKeyField != null) {
-				menuKeyField.setAccessible(true);
-				menuKeyField.setBoolean(config, false);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }
