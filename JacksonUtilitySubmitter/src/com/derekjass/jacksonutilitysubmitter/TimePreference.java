@@ -1,51 +1,52 @@
 package com.derekjass.jacksonutilitysubmitter;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TimePicker;
 
 public class TimePreference extends DialogPreference {
 
-	static final int DEFAULT_TIME = 720;
+	private static final int DEFAULT_TIME = 720;
 
-	private int time;
-	private TimePicker picker;
+	private int mTime;
+	private TimePicker mPicker;
 
 	public TimePreference(Context ctxt, AttributeSet attrs) {
 		super(ctxt, attrs);
 
+		setDialogLayoutResource(R.layout.preference_time);
 		setPositiveButtonText(android.R.string.ok);
 		setNegativeButtonText(android.R.string.cancel);
-	}
-
-	@Override
-	protected View onCreateDialogView() {
-		picker = new TimePicker(getContext());
-		picker.setIs24HourView(false);
-
-		return picker;
 	}
 
 	@Override
 	protected void onBindDialogView(View v) {
 		super.onBindDialogView(v);
 
-		picker.setCurrentHour(time / 60);
-		picker.setCurrentMinute(time % 60);
+		mPicker = (TimePicker) v;
+
+		mPicker.setIs24HourView(DateFormat.is24HourFormat(getContext()));
+		mPicker.setCurrentHour(mTime / 60);
+		mPicker.setCurrentMinute(mTime % 60);
 	}
 
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
 		if (positiveResult) {
-			time = picker.getCurrentHour() * 60;
-			time += picker.getCurrentMinute();
+			mTime = mPicker.getCurrentHour() * 60;
+			mTime += mPicker.getCurrentMinute();
 
-			persistInt(time);
+			persistInt(mTime);
 
-			setTimeSummary(time);
+			setTimeSummary();
 		}
 	}
 
@@ -57,32 +58,25 @@ public class TimePreference extends DialogPreference {
 	@Override
 	protected void onSetInitialValue(boolean restoreVal, Object defaultVal) {
 		if (restoreVal) {
-			time = this.getPersistedInt(DEFAULT_TIME);
+			mTime = getPersistedInt(DEFAULT_TIME);
 		}
 		else {
-			time = (Integer) defaultVal;
-			persistInt(time);
+			mTime = (Integer) defaultVal;
+			persistInt(mTime);
 		}
 
-		setTimeSummary(time);
+		setTimeSummary();
 	}
 
-	private void setTimeSummary(int time) {
-		StringBuilder summary = new StringBuilder();
-		int hours = time / 60;
-		int minutes = time % 60;
+	private void setTimeSummary() {
+		Calendar c = Calendar.getInstance();
+		c.clear();
+		c.add(Calendar.MINUTE, mTime);
 
-		if (hours == 0) {
-			summary.append(12);
-		} else if (hours > 12) {
-			summary.append(hours - 12);
-		} else {
-			summary.append(hours);
-		}
+		SimpleDateFormat timeFormat = new SimpleDateFormat(
+				DateFormat.is24HourFormat(getContext()) ?
+						"HH:mm" : "h:mm a", Locale.US);
 
-		summary.append(":").append(String.format("%02d", minutes));
-		summary.append(hours >= 12 ? " PM" : " AM");
-
-		setSummary(summary.toString());
+		setSummary(timeFormat.format(c.getTime()));
 	}
 }
