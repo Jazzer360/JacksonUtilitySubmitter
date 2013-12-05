@@ -28,6 +28,10 @@
 			</intent-filter>
 		</activity>
 		<activity
+			android:name=".HistoryGraphActivity"
+			android:label="@string/history_graph" >
+		</activity>
+		<activity
 			android:name=".SettingsActivity"
 			android:label="@string/settings"
 			android:screenOrientation="portrait" >

@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_history_graph:
-			// TODO add history graph.
+			startActivity(new Intent(this, HistoryGraphActivity.class));
 			return true;
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
