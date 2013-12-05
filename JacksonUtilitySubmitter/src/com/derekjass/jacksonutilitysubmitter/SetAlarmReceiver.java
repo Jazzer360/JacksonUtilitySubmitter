@@ -12,14 +12,14 @@ import android.preference.PreferenceManager;
 
 public class SetAlarmReceiver extends BroadcastReceiver {
 
-	private SharedPreferences prefs;
-	private Context context;
+	private SharedPreferences mPrefs;
+	private Context mContext;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		this.context = context;
+		this.mContext = context;
 		PreferenceManager.setDefaultValues(context, R.xml.preferences, false);
-		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		AlarmManager alarmManager =
 				(AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -28,7 +28,7 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 		PendingIntent pi = PendingIntent.getBroadcast(
 				context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		boolean notificationsEnabled = prefs.getBoolean(
+		boolean notificationsEnabled = mPrefs.getBoolean(
 				context.getString(R.string.pref_enable_notifications),
 				true);
 
@@ -40,16 +40,16 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 	}
 
 	private long getAlarmTime() {
-		long lastSubmit = prefs.getLong(
-				context.getString(R.string.pref_last_submit),
+		long lastSubmit = mPrefs.getLong(
+				mContext.getString(R.string.pref_last_submit),
 				0);
-		int notifTime = prefs.getInt(
-				context.getString(R.string.pref_notification_time),
+		int notifTime = mPrefs.getInt(
+				mContext.getString(R.string.pref_notification_time),
 				720);
 
 		if (lastSubmit == 0) {
-			prefs.edit().putLong(
-					context.getString(R.string.pref_last_submit),
+			mPrefs.edit().putLong(
+					mContext.getString(R.string.pref_last_submit),
 					System.currentTimeMillis()).commit();
 		}
 
