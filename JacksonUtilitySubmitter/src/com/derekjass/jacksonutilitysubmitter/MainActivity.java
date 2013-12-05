@@ -29,6 +29,8 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getSupportActionBar().setTitle(R.string.read_meters);
+
 		setContentView(R.layout.activity_main);
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));

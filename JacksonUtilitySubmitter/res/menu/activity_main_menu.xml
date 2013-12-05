@@ -6,7 +6,7 @@
 		android:id="@+id/action_history_graph"
 		android:icon="@drawable/ic_graph"
 		android:title="@string/history_graph"
-		app:showAsAction="always">
+		app:showAsAction="ifRoom">
 	</item>
 	<item
 		android:id="@+id/action_settings"
