@@ -10,9 +10,16 @@
 		android:onClick="animateBar"
 		android:text="Animate" />
 
-	<View
+	<com.derekjass.jacksonutilitysubmitter.views.BarView
 		android:id="@+id/bar"
-		android:layout_width="30dp"
+		android:layout_width="50dp"
+		android:layout_height="match_parent"
+		android:layout_gravity="bottom"
+		android:background="@drawable/bar" />
+
+	<com.derekjass.jacksonutilitysubmitter.views.BarView
+		android:id="@+id/bar2"
+		android:layout_width="50dp"
 		android:layout_height="match_parent"
 		android:layout_gravity="bottom"
 		android:background="@drawable/bar" />
