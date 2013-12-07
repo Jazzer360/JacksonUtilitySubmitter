@@ -2,12 +2,14 @@ package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.Calendar;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 public class SetAlarmReceiver extends BroadcastReceiver {
@@ -15,6 +17,7 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 	private SharedPreferences mPrefs;
 	private Context mContext;
 
+	@TargetApi(Build.VERSION_CODES.KITKAT)
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		this.mContext = context;
@@ -33,7 +36,12 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 				true);
 
 		if (notificationsEnabled) {
-			alarmManager.set(AlarmManager.RTC, getAlarmTime(), pi);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				alarmManager.setExact(
+						AlarmManager.RTC_WAKEUP, getAlarmTime(), pi);
+			} else {
+				alarmManager.set(AlarmManager.RTC_WAKEUP, getAlarmTime(), pi);
+			}
 		} else {
 			alarmManager.cancel(pi);
 		}
