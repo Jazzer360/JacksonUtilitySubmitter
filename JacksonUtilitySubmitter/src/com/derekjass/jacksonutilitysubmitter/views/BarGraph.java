@@ -8,7 +8,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
+import android.graphics.Paint.Align;
+import android.graphics.Point;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -77,7 +80,33 @@ public class BarGraph extends ViewGroup {
 			setBackgroundDrawable(bg);
 		}
 	}
+	
+	private static class Gridline {
+		public PointF mStart;
+		public PointF mEnd;
+		public String mLabel;
+		
+		public Gridline(PointF start, PointF end, String label) {
+			mStart = start;
+			mEnd = end;
+			mLabel = label;
+		}
+		
+		public Gridline(float startX, float startY, float endX, float endY
+				, String label) {
+			mStart = new PointF(startX, startY);
+			mEnd = new PointF(endX, endY);
+			mLabel = label;
+		}
+		
+		public void draw(Canvas canvas, Paint linePaint, Paint labelPaint) {
+			canvas.drawLine(mStart.x, mStart.y, mEnd.x, mEnd.y, linePaint);
+			labelPaint.setTextAlign(Align.RIGHT);
+			canvas.drawText(mLabel, mStart.x, mStart.y, labelPaint);
+		}
+	}
 
+	private static final String TAG = "BarGraph";
 	private static final int TICK_SPACING_MIN_DP = 50;
 	private static final int TICK_SPACING_MAX_DP = 100;
 	
@@ -93,13 +122,14 @@ public class BarGraph extends ViewGroup {
 	private List<Integer> mValues;
 	private List<String> mLabels;
 
+	private Rect mViewBounds;
+	private Rect mGraphBounds;
 	private int mBarCount;
 	private int mBarSpacing;
 	private int mBarWidth;
 	private int mBarColor;
 	private int mMaxValue;
 	private int mTickSpacing;
-
 	static {
 		sLinePaint = new Paint();
 		sLinePaint.setColor(0xFF999999);
@@ -116,9 +146,9 @@ public class BarGraph extends ViewGroup {
 		// TODO Custom attributes
 		mValues = new ArrayList<Integer>();
 		mLabels = new ArrayList<String>();
+		mGraphBounds = new Rect();
 		setBarCount(1);
 		setMaxValue(1);
-		setTickSpacing(40);
 	}
 
 	@Override
@@ -133,8 +163,14 @@ public class BarGraph extends ViewGroup {
 	}
 
 	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		mGraphBounds.set(0, 0, w, h);
+		mViewBounds.set(0, 0, w, h);
+	}
+
+	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		Log.i("BarGraph", "onLayout children: " + String.valueOf(getChildCount()));
+		Log.i(TAG, "onLayout children: " + String.valueOf(getChildCount()));
 		for (int i = 0; i < getChildCount(); i++) {
 			int totalBarWidth = mBarWidth + mBarSpacing * 2;
 			int left = leftPadding + mBarSpacing +
@@ -147,7 +183,7 @@ public class BarGraph extends ViewGroup {
 
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
-		Log.i("BarGraph", "dispatchDraw");
+		Log.i(TAG, "dispatchDraw");
 		super.dispatchDraw(canvas);
 		canvas.drawLine(leftPadding, 0f,
 				leftPadding, getHeight() - bottomPadding,
@@ -162,7 +198,7 @@ public class BarGraph extends ViewGroup {
 		for (int i = 0; i < Math.min(mBarCount, values.size()); i++) {
 			AnimatingBarView v = (AnimatingBarView) getChildAt(i);
 			float scale = (float) values.get(i) / mMaxValue;
-			if (v.getScale() != scale) v.setScale(scale);
+			if (v.mScale != scale) v.setScale(scale);
 		}
 	}
 
@@ -204,12 +240,7 @@ public class BarGraph extends ViewGroup {
 		invalidate();
 	}
 
-	public void setTickSpacing(int value) {
-		mTickSpacing = value;
-		invalidate();
-	}
-	
-	public void setDefaultTickSpacing() {
+	private void setTickSpacing() {
 		
 	}
 
