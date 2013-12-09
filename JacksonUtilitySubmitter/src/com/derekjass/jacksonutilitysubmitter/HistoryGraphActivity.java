@@ -29,8 +29,6 @@ public class HistoryGraphActivity extends ActionBarActivity {
 		graph.setMaxValue(11);
 		graph.setBarCount(2);
 		graph.setBarColor(Color.GREEN);
-		graph.setBarWidth(
-				(int) (getResources().getDisplayMetrics().density * 30));
 		graph.setValues(values);
 	}
 }
