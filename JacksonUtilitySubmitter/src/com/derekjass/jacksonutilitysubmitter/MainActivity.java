@@ -2,10 +2,13 @@ package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.List;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -17,7 +20,24 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper;
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
+
 public class MainActivity extends ActionBarActivity {
+
+	private class SaveReadingsTask
+	extends AsyncTask<ContentValues, Void, Void> {
+		@Override
+		protected Void doInBackground(ContentValues... params) {
+			if (mDbHelper == null) {
+				mDbHelper = new ReadingsDbHelper(MainActivity.this);
+			}
+			SQLiteDatabase db = mDbHelper.getWritableDatabase();
+			db.insert(Columns.TABLE_NAME, null, params[0]);
+			db.close();
+			return null;
+		}
+	}
 
 	private EditText mNameText;
 	private EditText mAddressText;
@@ -25,6 +45,8 @@ public class MainActivity extends ActionBarActivity {
 	private EditText mWaterText;
 
 	private SharedPreferences mPrefs;
+
+	private ReadingsDbHelper mDbHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +113,8 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	public void submitReadings(View v) {
+		new SaveReadingsTask().execute(getContentValues());
+
 		Intent i = new Intent(Intent.ACTION_SEND);
 		i.setType("message/rfc822");
 		i.putExtra(Intent.EXTRA_EMAIL,
@@ -134,5 +158,23 @@ public class MainActivity extends ActionBarActivity {
 		prefsEditor.putLong(getString(R.string.pref_last_submit),
 				System.currentTimeMillis());
 		prefsEditor.commit();
+	}
+
+	private ContentValues getContentValues() {
+		ContentValues vals = new ContentValues();
+		vals.put(Columns.DATE, System.currentTimeMillis());
+		vals.put(Columns.ELECTRIC, getIntFromEditText(mElectricText));
+		vals.put(Columns.WATER, getIntFromEditText(mWaterText));
+		return vals;
+	}
+
+	private static int getIntFromEditText(EditText view) {
+		int result = 0;
+		try {
+			result = Integer.valueOf(view.getText().toString());
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }

@@ -164,7 +164,6 @@ public class BarGraph extends ViewGroup {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		mGraphBounds.set(getLeftPadding(), 0, w, h - getBottomPadding());
 		mViewBounds.set(0, 0, w, h);
-		generateGridlines();
 	}
 
 	@Override
@@ -184,6 +183,7 @@ public class BarGraph extends ViewGroup {
 
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
+		generateGridlines();
 		for (Gridline line : mGridlines) {
 			line.draw(canvas, mGridlinePaint, mGridlineTextPaint);
 		}
@@ -288,7 +288,6 @@ public class BarGraph extends ViewGroup {
 
 	public void setMaxValue(int max) {
 		mMaxValue = max;
-		generateGridlines();
 		invalidate();
 	}
 
