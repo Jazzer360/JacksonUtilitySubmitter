@@ -15,13 +15,19 @@ public class HistoryGraphActivity extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.activity_history_graph);
 
 		graph = (BarGraph) findViewById(R.id.graph);
 		graph.setMaxValue(200);
-		graph.setBarCount(10);
+		graph.setBarCount(12);
 		graph.setBarColor(0xFF33B5E5);
+		
+		ArrayList<String> labels = new ArrayList<String>();
+		labels.add("Jan");
+		labels.add("Feb");
+		labels.add("Mar");
+		graph.setLabels(labels);
 	}
 
 	public void setupGraph(View v) {

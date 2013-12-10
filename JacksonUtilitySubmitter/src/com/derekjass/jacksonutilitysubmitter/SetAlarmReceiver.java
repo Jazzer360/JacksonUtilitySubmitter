@@ -56,15 +56,14 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 				720);
 
 		if (lastSubmit == 0) {
+			lastSubmit = System.currentTimeMillis();
 			mPrefs.edit().putLong(
 					mContext.getString(R.string.pref_last_submit),
-					System.currentTimeMillis()).commit();
+					lastSubmit).commit();
 		}
 
 		Calendar c = Calendar.getInstance();
-		if (lastSubmit != 0) {
-			c.setTimeInMillis(lastSubmit);
-		}
+		c.setTimeInMillis(lastSubmit);
 
 		c.add(Calendar.MONTH, 1);
 

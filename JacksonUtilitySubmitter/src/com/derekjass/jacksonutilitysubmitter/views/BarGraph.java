@@ -96,7 +96,7 @@ public class BarGraph extends ViewGroup {
 		}
 	}
 
-	private static final int GRID_SPACING_DP = 50;
+	private static final int GRID_SPACING_DP = 40;
 	private static final int GRIDLINE_PROTRUSION_DP = 5;
 	private static final int BAR_WIDTH_DP = 30;
 	private static final float BAR_TO_SPACING_RATIO = 0.7f;
@@ -108,7 +108,6 @@ public class BarGraph extends ViewGroup {
 	private Paint mGridlineTextPaint;
 	private Paint mLabelPaint;
 
-	private List<Integer> mValues;
 	private List<String> mLabels;
 	private int mBarCount;
 	private int mBarColor;
@@ -133,11 +132,11 @@ public class BarGraph extends ViewGroup {
 
 		mAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAxisPaint.setColor(0xFF444444);
-		mAxisPaint.setStrokeWidth(2f);
+		mAxisPaint.setStrokeWidth(1f * mDensity);
 
 		mGridlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mGridlinePaint.setColor(0xFF888888);
-		mGridlinePaint.setStrokeWidth(1f);
+		mGridlinePaint.setStrokeWidth(0f);
 
 		mGridlineTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mGridlineTextPaint.setColor(0xFF888888);
@@ -165,6 +164,7 @@ public class BarGraph extends ViewGroup {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		mGraphBounds.set(getLeftPadding(), 0, w, h - getBottomPadding());
 		mViewBounds.set(0, 0, w, h);
+		generateGridlines();
 	}
 
 	@Override
@@ -184,10 +184,11 @@ public class BarGraph extends ViewGroup {
 
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
-		generateGridlines();
 		for (Gridline line : mGridlines) {
 			line.draw(canvas, mGridlinePaint, mGridlineTextPaint);
 		}
+		drawTicks(canvas);
+		drawLabels(canvas);
 
 		super.dispatchDraw(canvas);
 
@@ -199,6 +200,27 @@ public class BarGraph extends ViewGroup {
 				mAxisPaint);
 	}
 
+	private void drawLabels(Canvas canvas) {
+		float spacing = mGraphBounds.width() / mBarCount;
+		float startX = mGraphBounds.left + spacing / 2;
+		for (int i = 0; i < Math.min(mBarCount, mLabels.size()); i++) {
+			canvas.drawText(mLabels.get(i),
+					startX + spacing * i,
+					mGraphBounds.bottom + -mLabelPaint.ascent(),
+					mLabelPaint);
+		}
+	}
+
+	private void drawTicks(Canvas canvas) {
+		float spacing = mGraphBounds.width() / mBarCount;
+		for (int i = 1; i < mBarCount; i++) {
+			float x = mGraphBounds.left + i * spacing;
+			canvas.drawLine(x, mGraphBounds.bottom,
+					x, mGraphBounds.bottom + px(GRIDLINE_PROTRUSION_DP),
+					mGridlinePaint);
+		}
+	}
+
 	@Override
 	protected int getSuggestedMinimumWidth() {
 		float label = getLeftPadding();
@@ -206,15 +228,25 @@ public class BarGraph extends ViewGroup {
 		return (int) (label + bars);
 	}
 
+	private float getLeftPadding() {
+		float label = mGridlineTextPaint
+				.measureText(String.valueOf(mMaxValue)) + px(2);
+		float gridline = px(GRIDLINE_PROTRUSION_DP);
+		return label + gridline;
+	}
+
 	@Override
 	protected int getSuggestedMinimumHeight() {
-		float bars = px(GRID_SPACING_DP) * 3;
+		float bars = px(GRID_SPACING_DP) * 3 + 1;
 		float label = getBottomPadding();
 		return (int) (bars + label);
 	}
 
+	private float getBottomPadding() {
+		return mLabelPaint.getFontSpacing();
+	}
+
 	public void setValues(ArrayList<Integer> values) {
-		mValues = values;
 		for (int i = 0; i < Math.min(mBarCount, values.size()); i++) {
 			AnimatingBarView v = (AnimatingBarView) getChildAt(i);
 			float scale = (float) values.get(i) / mMaxValue;
@@ -256,19 +288,8 @@ public class BarGraph extends ViewGroup {
 
 	public void setMaxValue(int max) {
 		mMaxValue = max;
-		requestLayout();
+		generateGridlines();
 		invalidate();
-	}
-
-	private float getLeftPadding() {
-		float label = mGridlineTextPaint
-				.measureText(String.valueOf(mMaxValue)) + px(2);
-		float gridline = px(GRIDLINE_PROTRUSION_DP);
-		return label + gridline;
-	}
-
-	private float getBottomPadding() {
-		return mLabelPaint.getFontMetrics().leading;
 	}
 
 	private void generateGridlines() {

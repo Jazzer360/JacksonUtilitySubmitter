@@ -9,6 +9,7 @@
 
 		<com.derekjass.jacksonutilitysubmitter.TimePreference
 			android:defaultValue="720"
+			android:dependency="@string/pref_enable_notifications"
 			android:key="@string/pref_notification_time"
 			android:title="@string/notification_time" />
 	</PreferenceCategory>
