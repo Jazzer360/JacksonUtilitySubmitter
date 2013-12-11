@@ -169,7 +169,8 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	private static int getIntFromEditText(EditText view) {
-		int result = 0;
+		int result = -1;
+		if (TextUtils.isEmpty(view.getText())) return result;
 		try {
 			result = Integer.valueOf(view.getText().toString());
 		} catch (NumberFormatException e) {
