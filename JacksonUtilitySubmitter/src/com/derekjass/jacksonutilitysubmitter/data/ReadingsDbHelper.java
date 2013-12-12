@@ -8,6 +8,9 @@ import android.provider.BaseColumns;
 public class ReadingsDbHelper extends SQLiteOpenHelper {
 
 	public static final class Columns implements BaseColumns {
+
+		private Columns() {}
+
 		public static final String TABLE_NAME = "readings";
 		public static final String DATE = "date";
 		public static final String ELECTRIC = "electric";

@@ -65,7 +65,8 @@ public class BarGraph extends ViewGroup {
 		@SuppressWarnings("deprecation")
 		public void setColor(int color) {
 			WeakReference<Drawable> ref = sBackgrounds.get(color);
-			Drawable bg = ref != null ? sBackgrounds.get(color).get() : null;
+			Drawable bg = null;
+			if (ref != null) bg = ref.get();
 
 			if (bg == null) {
 				bg = getBackground().mutate();
@@ -237,7 +238,7 @@ public class BarGraph extends ViewGroup {
 
 	@Override
 	protected int getSuggestedMinimumHeight() {
-		float bars = px(GRID_SPACING_DP) * 3 + 1;
+		float bars = (float) Math.ceil(px(GRID_SPACING_DP) * 3);
 		float label = getBottomPadding();
 		return (int) (bars + label);
 	}
