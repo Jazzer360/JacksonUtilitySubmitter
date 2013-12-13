@@ -21,7 +21,7 @@ public class ReadingsDbHelper extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;
 	private static final String DATABASE_NAME = "Readings.db";
 
-	private static final String SQL_CREATE_MATCHES =
+	private static final String SQL_CREATE_READINGS =
 			"CREATE TABLE " + Columns.TABLE_NAME + " (" +
 					Columns._ID + " INTEGER PRIMARY KEY," +
 					Columns.DATE + " INTEGER," +
@@ -35,7 +35,7 @@ public class ReadingsDbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(SQL_CREATE_MATCHES);
+		db.execSQL(SQL_CREATE_READINGS);
 	}
 
 	@Override
