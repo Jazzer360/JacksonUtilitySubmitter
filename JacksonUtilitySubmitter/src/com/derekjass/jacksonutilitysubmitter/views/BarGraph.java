@@ -69,7 +69,7 @@ public class BarGraph extends ViewGroup {
 			if (ref != null) bg = ref.get();
 
 			if (bg == null) {
-				bg = getBackground().mutate();
+				bg = getResources().getDrawable(R.drawable.bar).mutate();
 				bg.setColorFilter(new LightingColorFilter(color, 0));
 				sBackgrounds.put(color, new WeakReference<Drawable>(bg));
 			}
@@ -97,7 +97,7 @@ public class BarGraph extends ViewGroup {
 		}
 	}
 
-	private static final int GRID_SPACING_DP = 40;
+	private static final int GRID_SPACING_DP = 30;
 	private static final int GRIDLINE_PROTRUSION_DP = 5;
 	private static final int BAR_WIDTH_DP = 30;
 	private static final float BAR_TO_SPACING_RATIO = 0.7f;
@@ -126,7 +126,6 @@ public class BarGraph extends ViewGroup {
 		super(context, attrs);
 		mDensity = getResources().getDisplayMetrics().density;
 
-		mLabels = new ArrayList<String>();
 		mGridlines = new ArrayList<Gridline>();
 		mViewBounds = new RectF();
 		mGraphBounds = new RectF();
@@ -185,9 +184,7 @@ public class BarGraph extends ViewGroup {
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
 		generateGridlines();
-		for (Gridline line : mGridlines) {
-			line.draw(canvas, mGridlinePaint, mGridlineTextPaint);
-		}
+		drawGridlines(canvas);
 		drawTicks(canvas);
 		drawLabels(canvas);
 
@@ -201,7 +198,14 @@ public class BarGraph extends ViewGroup {
 				mAxisPaint);
 	}
 
+	private void drawGridlines(Canvas canvas) {
+		for (Gridline line : mGridlines) {
+			line.draw(canvas, mGridlinePaint, mGridlineTextPaint);
+		}
+	}
+
 	private void drawLabels(Canvas canvas) {
+		if (mLabels == null) return;
 		float spacing = mGraphBounds.width() / mBarCount;
 		float startX = mGraphBounds.left + spacing / 2;
 		for (int i = 0; i < Math.min(mBarCount, mLabels.size()); i++) {
@@ -226,21 +230,21 @@ public class BarGraph extends ViewGroup {
 	protected int getSuggestedMinimumWidth() {
 		float label = getLeftPadding();
 		float bars = px(BAR_WIDTH_DP) / BAR_TO_SPACING_RATIO * mBarCount;
-		return (int) (label + bars);
+		return (int) Math.ceil(label + bars);
 	}
 
 	private float getLeftPadding() {
 		float label = mGridlineTextPaint
-				.measureText(String.valueOf(mMaxValue)) + px(2);
+				.measureText(String.valueOf(mMaxValue));
 		float gridline = px(GRIDLINE_PROTRUSION_DP);
 		return label + gridline;
 	}
 
 	@Override
 	protected int getSuggestedMinimumHeight() {
-		float bars = (float) Math.ceil(px(GRID_SPACING_DP) * 3);
+		float bars = px(GRID_SPACING_DP) * 3;
 		float label = getBottomPadding();
-		return (int) (bars + label);
+		return (int) Math.ceil(bars + label);
 	}
 
 	private float getBottomPadding() {
@@ -271,7 +275,7 @@ public class BarGraph extends ViewGroup {
 			} while (getChildCount() < num);
 		} else {
 			do {
-				removeViewAt(0);
+				removeViewAt(getChildCount() - 1);
 			} while (getChildCount() > num);
 		}
 		mBarCount = num;

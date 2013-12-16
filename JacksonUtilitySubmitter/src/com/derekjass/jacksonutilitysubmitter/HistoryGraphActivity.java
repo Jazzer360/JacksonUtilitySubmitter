@@ -31,6 +31,7 @@ public class HistoryGraphActivity extends ActionBarActivity {
 	}
 
 	public void setupGraph(View v) {
+		graph.setBarCount((int) (Math.random() * 12 + 1));
 		ArrayList<Integer> values = new ArrayList<Integer>();
 		values.add((int) (Math.random() * 200));
 		values.add((int) (Math.random() * 200));
