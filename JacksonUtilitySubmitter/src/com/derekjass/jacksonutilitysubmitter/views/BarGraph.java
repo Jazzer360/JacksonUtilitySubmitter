@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
@@ -125,6 +126,18 @@ public class BarGraph extends ViewGroup {
 	public BarGraph(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mDensity = getResources().getDisplayMetrics().density;
+
+		TypedArray a = context.getTheme().obtainStyledAttributes(
+				attrs,
+				R.styleable.BarGraph,
+				0, 0);
+
+		try {
+			setBarCount(a.getInteger(R.styleable.BarGraph_barCount, 1));
+			setBarColor(a.getColor(R.styleable.BarGraph_barColor, 0xFFFFFFFF));
+		} finally {
+			a.recycle();
+		}
 
 		mGridlines = new ArrayList<Gridline>();
 		mViewBounds = new RectF();
