@@ -1,11 +1,8 @@
 package com.derekjass.jacksonutilitysubmitter.util;
 
-import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import android.annotation.TargetApi;
 import android.database.Cursor;
-import android.os.Build;
 
 public class UsageStatistics {
 
@@ -46,17 +43,15 @@ public class UsageStatistics {
 		}
 	}
 
-	private NavigableSet<Entry> mReadings;
+	private TreeSet<Entry> mReadings;
 
-	// TODO make compatible with API 8
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public UsageStatistics(Cursor data, int dateCol, int readingCol) {
 		mReadings = new TreeSet<Entry>();
 		if (!data.moveToFirst()) return;
 		do {
-			mReadings.add(
-					new Entry(data.getLong(dateCol),
-							data.getInt(readingCol)));
+			long time = data.getLong(dateCol);
+			int reading = data.getInt(readingCol);
+			mReadings.add(new Entry(time, reading));
 		} while (data.moveToNext());
 	}
 
