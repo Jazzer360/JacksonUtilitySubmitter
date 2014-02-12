@@ -16,7 +16,7 @@ public class UsageStatistics {
 		do {
 			long time = data.getLong(timeColIndex);
 			int reading = data.getInt(valueColIndex);
-			mReadings.put(time, reading);
+			if (reading >= 0) mReadings.put(time, reading);
 		} while (data.moveToNext());
 	}
 
