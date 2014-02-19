@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Jackson Utility Submitter</string>
+	<string name="name">Name:</string>
+	<string name="name_hint">Ex. John Doe</string>
+	<string name="address">Address:</string>
+	<string name="electric">Electric:</string>
+	<string name="water">Water:</string>
+	<string name="address_hint">Ex. 80 W Ashley St</string>
+	<string name="submit">Submit</string>
+	<string name="email_subject">Meter Readings</string>
+	<string name="email_address">utilities@cityofjacksonmn.com</string>
+	<string name="error_no_email_client">There are no email clients installed.</string>
+	<string name="read_meters">Read Meters</string>
+	<string name="notification_body">Tap to submit readings.</string>
+	<string name="settings">Settings</string>
+	<string name="enable_notifications">Enable notifications</string>
+	<string name="notification_time">Notification time</string>
+	<string name="notification_settings">Notification settings</string>
+	<string name="history_graph">History graph</string>
+	<string name="graph_electric">Electricity</string>
+	<string name="graph_water">Water</string>
+
+</resources>

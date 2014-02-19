@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.derekjass.jacksonutilitysubmitter"
+	android:versionCode="10"
+	android:versionName="1.2.0" >
+
+	<uses-sdk
+		android:minSdkVersion="9"
+		android:targetSdkVersion="19" />
+
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+	<application
+		android:allowBackup="true"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+		<activity
+			android:name=".MainActivity"
+			android:label="@string/app_name"
+			android:launchMode="singleTop"
+			android:screenOrientation="portrait" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".HistoryGraphActivity"
+			android:label="@string/history_graph"
+			android:parentActivityName=".MainActivity" >
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".MainActivity" />
+		</activity>
+		<activity
+			android:name=".SettingsActivity"
+			android:label="@string/settings"
+			android:parentActivityName=".MainActivity"
+			android:screenOrientation="portrait" >
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".MainActivity" />
+		</activity>
+
+		<receiver android:name=".NotificationReceiver" >
+		</receiver>
+		<receiver android:name=".SetAlarmReceiver" >
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+			</intent-filter>
+		</receiver>
+	</application>
+
+</manifest>

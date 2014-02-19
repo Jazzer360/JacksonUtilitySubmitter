@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<declare-styleable name="BarGraph">
+		<attr name="barCount" format="integer" />
+		<attr name="barColor" format="reference|color" />
+	</declare-styleable>
+
+</resources>
