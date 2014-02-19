@@ -29,7 +29,7 @@ public class ReadingsLoader extends AsyncTaskLoader<Cursor> {
 				Columns.DATE + " ASC");
 		return mCursor;
 	}
-	
+
 	@Override
 	protected void onReset() {
 		super.onReset();
