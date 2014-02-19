@@ -1,11 +1,11 @@
 package com.derekjass.jacksonutilitysubmitter.data;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.AsyncTaskLoader;
+
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
 
 public class ReadingsLoader extends AsyncTaskLoader<Cursor> {
 

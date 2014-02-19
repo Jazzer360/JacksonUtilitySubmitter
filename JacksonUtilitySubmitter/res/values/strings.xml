@@ -18,5 +18,7 @@
 	<string name="notification_time">Notification time</string>
 	<string name="notification_settings">Notification settings</string>
 	<string name="history_graph">History graph</string>
+	<string name="graph_electric">Electricity</string>
+	<string name="graph_water">Water</string>
 
 </resources>
