@@ -34,29 +34,33 @@ public class ReadingsBackupAgent extends BackupAgent {
 				null,
 				Columns.DATE + " ASC");
 
-		ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
-		DataOutputStream outWriter = new DataOutputStream(bufStream);
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		DataOutputStream out = new DataOutputStream(byteStream);
 
-		if (cursor.moveToFirst() == false) return;
+		int recordCount = cursor.getCount();
+		out.writeInt(recordCount);
 
 		int dateCol = cursor.getColumnIndexOrThrow(Columns.DATE);
 		int electricCol = cursor.getColumnIndexOrThrow(Columns.ELECTRIC);
 		int waterCol = cursor.getColumnIndexOrThrow(Columns.WATER);
 		int gasCol = cursor.getColumnIndexOrThrow(Columns.GAS);
 
-		do {
-			outWriter.writeLong(cursor.getLong(dateCol));
-			outWriter.writeInt(cursor.getInt(electricCol));
-			outWriter.writeInt(cursor.getInt(waterCol));
-			outWriter.writeInt(cursor.getInt(gasCol));
-		} while (cursor.moveToNext());
+		cursor.moveToFirst();
 
-		byte[] buffer = bufStream.toByteArray();
+		for (int i = 0; i < recordCount; i++) {
+			out.writeLong(cursor.getLong(dateCol));
+			out.writeInt(cursor.getInt(electricCol));
+			out.writeInt(cursor.getInt(waterCol));
+			out.writeInt(cursor.getInt(gasCol));
+			cursor.moveToNext();
+		}
+
+		byte[] buffer = byteStream.toByteArray();
 		int len = buffer.length;
 		data.writeEntityHeader(READINGS_KEY, len);
 		data.writeEntityData(buffer, len);
 
-		readingsDb.close();
+		helper.close();
 	}
 
 	@Override
@@ -69,24 +73,26 @@ public class ReadingsBackupAgent extends BackupAgent {
 			if (READINGS_KEY.equals(key)) {
 				byte[] dataBuf = new byte[dataSize];
 				data.readEntityData(dataBuf, 0, dataSize);
-				ByteArrayInputStream baStream = new ByteArrayInputStream(
+				ByteArrayInputStream byteStream = new ByteArrayInputStream(
 						dataBuf);
-				DataInputStream in = new DataInputStream(baStream);
+				DataInputStream in = new DataInputStream(byteStream);
 
 				ReadingsDbHelper helper = new ReadingsDbHelper(
 						getApplicationContext());
 				SQLiteDatabase db = helper.getWritableDatabase();
 
-				long date;
-				while ((date = in.readLong()) >= 0) {
+				int recordCount = in.readInt();
+				for (int i = 0; i < recordCount; i++) {
 					ContentValues cv = new ContentValues();
-					cv.put(Columns.DATE, date);
+					cv.put(Columns.DATE, in.readLong());
 					cv.put(Columns.ELECTRIC, in.readInt());
 					cv.put(Columns.WATER, in.readInt());
 					cv.put(Columns.GAS, in.readInt());
 
 					db.insert(Columns.TABLE_NAME, null, cv);
 				}
+
+				helper.close();
 			} else {
 				data.skipEntityData();
 			}

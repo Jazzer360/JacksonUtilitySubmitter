@@ -2,6 +2,7 @@ package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.List;
 
+import android.app.backup.BackupManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,6 +36,7 @@ public class MainActivity extends ActionBarActivity {
 			SQLiteDatabase db = mDbHelper.getWritableDatabase();
 			db.insert(Columns.TABLE_NAME, null, params[0]);
 			db.close();
+			mBackupManager.dataChanged();
 			return null;
 		}
 	}
@@ -47,6 +49,8 @@ public class MainActivity extends ActionBarActivity {
 	private SharedPreferences mPrefs;
 
 	private ReadingsDbHelper mDbHelper;
+
+	private BackupManager mBackupManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +67,8 @@ public class MainActivity extends ActionBarActivity {
 		mWaterText = (EditText) findViewById(R.id.waterEditText);
 
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		mBackupManager = new BackupManager(this);
 
 		String name = mPrefs.getString(
 				getString(R.string.pref_name), null);
