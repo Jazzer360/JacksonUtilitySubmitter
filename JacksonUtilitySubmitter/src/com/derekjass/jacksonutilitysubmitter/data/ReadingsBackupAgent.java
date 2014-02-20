@@ -6,8 +6,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
-
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
@@ -15,6 +13,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.ParcelFileDescriptor;
+
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
 
 public class ReadingsBackupAgent extends BackupAgent {
 
