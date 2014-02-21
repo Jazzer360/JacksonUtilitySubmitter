@@ -20,5 +20,7 @@
 	<string name="history_graph">History graph</string>
 	<string name="graph_electric">Electricity</string>
 	<string name="graph_water">Water</string>
+	<string name="purchase_feature">Purchase feature?</string>
+	<string name="feature_description">This feature unlocks the ability to view your historical meter readings in a set of bar graphs.</string>
 
 </resources>
