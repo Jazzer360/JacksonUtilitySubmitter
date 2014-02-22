@@ -21,7 +21,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -53,8 +52,6 @@ public class MainActivity extends ActionBarActivity {
 	private BackupManager mBackupManager;
 
 	private IInAppBillingService mBillingService;
-	private HistoryFeature mHistoryFeature = HistoryFeature.UNKNOWN;
-
 	private ServiceConnection mServiceConn = new ServiceConnection() {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -64,12 +61,12 @@ public class MainActivity extends ActionBarActivity {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mBillingService = IInAppBillingService.Stub.asInterface(service);
-			mCheckForPurchase.execute();
+			new CheckPurchasesTask().execute();
 		}
 	};
 
-	private AsyncTask<Void, Void, HistoryFeature> mCheckForPurchase =
-			new AsyncTask<Void, Void, HistoryFeature>() {
+	private class CheckPurchasesTask
+	extends AsyncTask<Void, Void, HistoryFeature> {
 		@Override
 		protected HistoryFeature doInBackground(Void... params) {
 			try {
@@ -92,11 +89,18 @@ public class MainActivity extends ActionBarActivity {
 		protected void onPostExecute(HistoryFeature result) {
 			mHistoryFeature = result;
 		}
-	};
+	}
+
+	private HistoryFeature mHistoryFeature = HistoryFeature.UNKNOWN;
+	private enum HistoryFeature {
+		PURCHASED, NOT_PURCHASED, UNKNOWN;
+		public static final String SKU = "history_feature";
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getSupportActionBar().setTitle(R.string.read_meters);
 		setContentView(R.layout.activity_main);
 		bindService(new
 				Intent("com.android.vending.billing.InAppBillingService.BIND"),
@@ -158,10 +162,7 @@ public class MainActivity extends ActionBarActivity {
 			startActivity(new Intent(this, HistoryGraphActivity.class));
 			break;
 		case UNKNOWN:
-			AsyncTask.Status status = mCheckForPurchase.getStatus();
-			if (!(status == Status.RUNNING || status == Status.PENDING)) {
-				mCheckForPurchase.execute();
-			}
+			new CheckPurchasesTask().execute();
 			break;
 		}
 	}
@@ -174,15 +175,15 @@ public class MainActivity extends ActionBarActivity {
 				new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				mPurchaseTask.execute();
+				new PurchaseHistoryFeatureTask().execute();
 			}
 		});
 		builder.setNegativeButton(android.R.string.no, null);
 		builder.show();
 	}
 
-	private AsyncTask<Void, Void, PendingIntent> mPurchaseTask =
-			new AsyncTask<Void, Void, PendingIntent>() {
+	private class PurchaseHistoryFeatureTask
+	extends AsyncTask<Void, Void, PendingIntent> {
 		@Override
 		protected PendingIntent doInBackground(Void... params) {
 			try {
@@ -207,7 +208,7 @@ public class MainActivity extends ActionBarActivity {
 				e.printStackTrace();
 			}
 		}
-	};
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode,
@@ -253,7 +254,7 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	public void submitReadings(View v) {
-		mSaveReadingsTask.execute(getContentValues());
+		new SaveReadingsTask().execute(getContentValues());
 		saveSubmittalTime();
 
 		Intent i = new Intent(Intent.ACTION_SEND);
@@ -276,8 +277,8 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	private AsyncTask<ContentValues, Void, Void> mSaveReadingsTask =
-			new AsyncTask<ContentValues, Void, Void>() {
+	private class SaveReadingsTask
+	extends AsyncTask<ContentValues, Void, Void> {
 		@Override
 		protected Void doInBackground(ContentValues... params) {
 			if (mDbHelper == null) {
@@ -289,7 +290,7 @@ public class MainActivity extends ActionBarActivity {
 			mBackupManager.dataChanged();
 			return null;
 		}
-	};
+	}
 
 	private String getMessageBody() {
 		StringBuilder body = new StringBuilder();
@@ -332,10 +333,5 @@ public class MainActivity extends ActionBarActivity {
 			e.printStackTrace();
 		}
 		return result;
-	}
-
-	private enum HistoryFeature {
-		PURCHASED, NOT_PURCHASED, UNKNOWN;
-		public static String SKU = "history_feature";
 	}
 }
