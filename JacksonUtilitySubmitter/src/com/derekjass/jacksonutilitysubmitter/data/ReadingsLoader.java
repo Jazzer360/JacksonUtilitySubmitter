@@ -34,5 +34,6 @@ public class ReadingsLoader extends AsyncTaskLoader<Cursor> {
 	protected void onReset() {
 		super.onReset();
 		mCursor.close();
+		mHelper.close();
 	}
 }

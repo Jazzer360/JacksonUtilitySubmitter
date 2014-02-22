@@ -60,6 +60,7 @@ public class ReadingsBackupAgent extends BackupAgent {
 		data.writeEntityHeader(READINGS_KEY, len);
 		data.writeEntityData(buffer, len);
 
+		cursor.close();
 		helper.close();
 	}
 
