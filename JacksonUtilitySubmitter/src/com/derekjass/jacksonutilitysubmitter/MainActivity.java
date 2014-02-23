@@ -88,6 +88,10 @@ public class MainActivity extends ActionBarActivity {
 						mHistoryFeature = HistoryFeature.PURCHASED;
 					}
 				}
+
+				if (mHistoryFeature == HistoryFeature.UNKNOWN) {
+					mHistoryFeature = HistoryFeature.NOT_PURCHASED;
+				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			} catch (JSONException e) {
