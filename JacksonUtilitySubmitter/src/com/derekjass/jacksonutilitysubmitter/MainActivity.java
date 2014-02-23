@@ -40,6 +40,8 @@ import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
 
 public class MainActivity extends ActionBarActivity {
 
+	private static final int PURCHASE_HISTORY_FEATURE_REQUEST = 0;
+	
 	private EditText mNameText;
 	private EditText mAddressText;
 	private EditText mElectricText;
@@ -66,32 +68,35 @@ public class MainActivity extends ActionBarActivity {
 	};
 
 	private class CheckPurchasesTask
-	extends AsyncTask<Void, Void, HistoryFeature> {
+	extends AsyncTask<Void, Void, Void> {
 		@Override
-		protected HistoryFeature doInBackground(Void... params) {
+		protected Void doInBackground(Void... params) {
 			try {
 				Bundle purchases = mBillingService.getPurchases(
 						3, getPackageName(), "inapp", null);
 				if (purchases.getInt("RESPONSE_CODE") != 0) {
-					return HistoryFeature.UNKNOWN;
+					return null;
 				}
-				ArrayList<String> skus = purchases.getStringArrayList(
-						"INAPP_PURCHASE_ITEM_LIST");
-				return skus.contains(HistoryFeature.SKU) ?
-						HistoryFeature.PURCHASED : HistoryFeature.NOT_PURCHASED;
+				ArrayList<String> details = purchases.getStringArrayList(
+						"INAPP_PURCHASE_DATA_LIST");
+
+				for (String detail : details) {
+					JSONObject jo = new JSONObject(detail);
+					if (jo.getInt("purchaseState") == 0 &&
+							jo.getString("productId") == HistoryFeature.SKU) {
+						mHistoryFeature = HistoryFeature.PURCHASED;
+					}
+				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
-			return HistoryFeature.UNKNOWN;
-		}
-
-		@Override
-		protected void onPostExecute(HistoryFeature result) {
-			mHistoryFeature = result;
+			return null;
 		}
 	}
 
-	private HistoryFeature mHistoryFeature = HistoryFeature.UNKNOWN;
+	private volatile HistoryFeature mHistoryFeature = HistoryFeature.UNKNOWN;
 	private enum HistoryFeature {
 		PURCHASED, NOT_PURCHASED, UNKNOWN;
 		public static final String SKU = "history_feature";
@@ -202,7 +207,8 @@ public class MainActivity extends ActionBarActivity {
 		protected void onPostExecute(PendingIntent result) {
 			if (result == null) return;
 			try {
-				startIntentSenderForResult(result.getIntentSender(), 0,
+				startIntentSenderForResult(result.getIntentSender(),
+						PURCHASE_HISTORY_FEATURE_REQUEST,
 						new Intent(), 0, 0, 0);
 			} catch (SendIntentException e) {
 				e.printStackTrace();
@@ -214,13 +220,14 @@ public class MainActivity extends ActionBarActivity {
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		switch (requestCode) {
-		case 0:
+		case PURCHASE_HISTORY_FEATURE_REQUEST:
 			if (resultCode == RESULT_OK) {
 				try {
 					JSONObject jo = new JSONObject(
 							data.getStringExtra("INAPP_PURCHASE_DATA"));
 					String sku = jo.getString("productId");
-					if (sku.equals(HistoryFeature.SKU)) {
+					if (sku.equals(HistoryFeature.SKU) &&
+							jo.getInt("purchaseState") == 0) {
 						mHistoryFeature = HistoryFeature.PURCHASED;
 						launchHistoryActivity();
 					}
