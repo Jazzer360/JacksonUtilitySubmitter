@@ -41,7 +41,7 @@ import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
 public class MainActivity extends ActionBarActivity {
 
 	private static final int PURCHASE_HISTORY_FEATURE_REQUEST = 0;
-	
+
 	private EditText mNameText;
 	private EditText mAddressText;
 	private EditText mElectricText;
@@ -83,7 +83,8 @@ public class MainActivity extends ActionBarActivity {
 				for (String detail : details) {
 					JSONObject jo = new JSONObject(detail);
 					if (jo.getInt("purchaseState") == 0 &&
-							jo.getString("productId") == HistoryFeature.SKU) {
+							jo.getString("productId").equals(
+									HistoryFeature.SKU)) {
 						mHistoryFeature = HistoryFeature.PURCHASED;
 					}
 				}
@@ -225,8 +226,7 @@ public class MainActivity extends ActionBarActivity {
 				try {
 					JSONObject jo = new JSONObject(
 							data.getStringExtra("INAPP_PURCHASE_DATA"));
-					String sku = jo.getString("productId");
-					if (sku.equals(HistoryFeature.SKU) &&
+					if (jo.getString("productId").equals(HistoryFeature.SKU) &&
 							jo.getInt("purchaseState") == 0) {
 						mHistoryFeature = HistoryFeature.PURCHASED;
 						launchHistoryActivity();
