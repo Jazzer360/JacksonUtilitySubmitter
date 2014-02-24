@@ -74,9 +74,7 @@ public class MainActivity extends ActionBarActivity {
 			try {
 				Bundle purchases = mBillingService.getPurchases(
 						3, getPackageName(), "inapp", null);
-				if (purchases.getInt("RESPONSE_CODE") != 0) {
-					return null;
-				}
+				if (purchases.getInt("RESPONSE_CODE") != 0) return null;
 				ArrayList<String> details = purchases.getStringArrayList(
 						"INAPP_PURCHASE_DATA_LIST");
 
