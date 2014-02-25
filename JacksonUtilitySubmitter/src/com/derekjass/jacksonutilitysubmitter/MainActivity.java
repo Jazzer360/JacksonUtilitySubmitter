@@ -68,13 +68,14 @@ public class MainActivity extends ActionBarActivity {
 	};
 
 	private class CheckPurchasesTask
-	extends AsyncTask<Void, Void, Void> {
+	extends AsyncTask<Void, Void, Boolean> {
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Boolean doInBackground(Void... params) {
 			try {
+				if (mBillingService == null) return false;
 				Bundle purchases = mBillingService.getPurchases(
 						3, getPackageName(), "inapp", null);
-				if (purchases.getInt("RESPONSE_CODE") != 0) return null;
+				if (purchases.getInt("RESPONSE_CODE") != 0) return false;
 				ArrayList<String> details = purchases.getStringArrayList(
 						"INAPP_PURCHASE_DATA_LIST");
 
@@ -90,12 +91,22 @@ public class MainActivity extends ActionBarActivity {
 				if (mHistoryFeature == HistoryFeature.UNKNOWN) {
 					mHistoryFeature = HistoryFeature.NOT_PURCHASED;
 				}
+				return true;
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			return null;
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean checkWasSuccessful) {
+			if (!checkWasSuccessful) {
+				Toast.makeText(MainActivity.this,
+						R.string.error_billing,
+						Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 
