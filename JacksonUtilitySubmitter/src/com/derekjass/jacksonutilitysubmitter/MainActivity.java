@@ -341,6 +341,7 @@ public class MainActivity extends ActionBarActivity {
 		vals.put(Columns.DATE, System.currentTimeMillis());
 		vals.put(Columns.ELECTRIC, getIntFromEditText(mElectricText));
 		vals.put(Columns.WATER, getIntFromEditText(mWaterText));
+		vals.put(Columns.GAS, -1);
 		return vals;
 	}
 
