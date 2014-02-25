@@ -60,8 +60,8 @@ public class BackupService extends IntentService {
 			dbHelper.close();
 		}
 
-		File dir = new File(Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_DOWNLOADS), "MeterReadingsBackup");
+		File dir = new File(Environment.getExternalStorageDirectory(),
+				"MeterReadingsBackup");
 		dir.mkdirs();
 		if (!dir.isDirectory()) return;
 		File file = new File(dir, "readings.backup");
