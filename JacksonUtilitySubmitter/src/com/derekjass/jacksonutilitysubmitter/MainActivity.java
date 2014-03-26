@@ -276,6 +276,7 @@ public class MainActivity extends ActionBarActivity {
 	public void submitReadings(View v) {
 		new SaveReadingsTask().execute(getContentValues());
 		saveSubmittalTime();
+		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
 
 		Intent i = new Intent(Intent.ACTION_SEND);
 		i.setType("message/rfc822");
