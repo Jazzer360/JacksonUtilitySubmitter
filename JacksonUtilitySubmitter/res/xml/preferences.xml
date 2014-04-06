@@ -13,5 +13,11 @@
 			android:key="@string/pref_notification_time"
 			android:title="@string/notification_time" />
 	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/gas_settings" >
+		<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="@string/pref_enable_gas"
+			android:title="@string/include_gas" />
+	</PreferenceCategory>
 
 </PreferenceScreen>

@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">Jackson Utility Submitter</string>
+
+	<string name="app_name">Jackson Utility Submitter</string>
 	<string name="name">Name:</string>
 	<string name="name_hint">Ex. John Doe</string>
 	<string name="address">Address:</string>
 	<string name="electric">Electric:</string>
 	<string name="water">Water:</string>
+	<string name="gas">Gas:</string>
 	<string name="address_hint">Ex. 80 W Ashley St</string>
 	<string name="submit">Submit</string>
+	<string name="history">History</string>
+	<string name="graph">Graph</string>
 	<string name="email_subject">Meter Readings</string>
 	<string name="email_address">utilities@cityofjacksonmn.com</string>
 	<string name="error_no_email_client">There are no email clients installed.</string>
@@ -17,11 +21,18 @@
 	<string name="enable_notifications">Enable notifications</string>
 	<string name="notification_time">Notification time</string>
 	<string name="notification_settings">Notification settings</string>
-	<string name="history_graph">History graph</string>
+	<string name="gas_settings">Gas field settings</string>
+	<string name="include_gas">Enable gas field</string>
 	<string name="graph_electric">Electricity</string>
 	<string name="graph_water">Water</string>
-	<string name="purchase_feature">Purchase feature?</string>
-	<string name="feature_description">This feature unlocks the ability to view your historical meter readings in a set of bar graphs.</string>
+	<string name="feature_description">
+<![CDATA[
+		<h1>Purchase feature?</h1>
+		<p>This feature unlocks the ability to view your historical meter
+		readings in a set of bar graphs.</p>
+		]]>
+	</string>
+	<string name="purchase">Purchase</string>
 	<string name="error_billing">Problem occurred while contacting billing service.</string>
 
 </resources>

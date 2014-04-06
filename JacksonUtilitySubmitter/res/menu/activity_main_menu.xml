@@ -3,12 +3,6 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto" >
 
 	<item
-		android:id="@+id/action_history_graph"
-		android:icon="@drawable/ic_graph"
-		android:title="@string/history_graph"
-		app:showAsAction="ifRoom">
-	</item>
-	<item
 		android:id="@+id/action_settings"
 		android:icon="@drawable/ic_action_settings"
 		android:title="@string/settings"

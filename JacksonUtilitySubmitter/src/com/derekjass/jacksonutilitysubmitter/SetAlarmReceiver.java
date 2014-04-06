@@ -21,7 +21,6 @@ public class SetAlarmReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		this.mContext = context;
-		PreferenceManager.setDefaultValues(context, R.xml.preferences, false);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		AlarmManager alarmManager =

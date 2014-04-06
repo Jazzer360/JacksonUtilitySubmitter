@@ -1,57 +1,41 @@
 package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.app.backup.BackupManager;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
+import com.derekjass.jacksonutilitysubmitter.PurchaseGraphFragment.GraphPurchasingAgent;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity
+implements ActionBar.TabListener, GraphPurchasingAgent {
 
-	private static final int PURCHASE_HISTORY_FEATURE_REQUEST = 0;
-
-	private EditText mNameText;
-	private EditText mAddressText;
-	private EditText mElectricText;
-	private EditText mWaterText;
-
-	private SharedPreferences mPrefs;
-
-	private ReadingsDbHelper mDbHelper;
-
-	private BackupManager mBackupManager;
+	private static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
 
 	private IInAppBillingService mBillingService;
 	private ServiceConnection mServiceConn = new ServiceConnection() {
@@ -83,13 +67,13 @@ public class MainActivity extends ActionBarActivity {
 					JSONObject jo = new JSONObject(detail);
 					if (jo.getInt("purchaseState") == 0 &&
 							jo.getString("productId").equals(
-									HistoryFeature.SKU)) {
-						mHistoryFeature = HistoryFeature.PURCHASED;
+									GraphFeature.SKU)) {
+						mGraphFeature = GraphFeature.PURCHASED;
 					}
 				}
 
-				if (mHistoryFeature == HistoryFeature.UNKNOWN) {
-					mHistoryFeature = HistoryFeature.NOT_PURCHASED;
+				if (mGraphFeature == GraphFeature.UNKNOWN) {
+					mGraphFeature = GraphFeature.NOT_PURCHASED;
 				}
 				return true;
 			} catch (RemoteException e) {
@@ -110,44 +94,55 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	private volatile HistoryFeature mHistoryFeature = HistoryFeature.UNKNOWN;
-	private enum HistoryFeature {
+	private volatile GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
+	private enum GraphFeature {
 		PURCHASED, NOT_PURCHASED, UNKNOWN;
 		public static final String SKU = "history_feature";
 	}
 
+	private ViewPager mViewPager;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
 		bindService(new
 				Intent("com.android.vending.billing.InAppBillingService.BIND"),
 				mServiceConn, Context.BIND_AUTO_CREATE);
-		getSupportActionBar().setTitle(R.string.read_meters);
-		setContentView(R.layout.activity_main);
+
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mViewPager.setAdapter(new MyPageAdapter(getSupportFragmentManager()));
+		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				getSupportActionBar().setSelectedNavigationItem(position);
+			}
+			@Override
+			public void onPageScrolled(int pos, float offset, int pixels) {}
+			@Override
+			public void onPageScrollStateChanged(int state) {}
+		});
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionBar.addTab(actionBar.newTab()
+				.setText(getString(R.string.submit)).setTabListener(this));
+		actionBar.addTab(actionBar.newTab()
+				.setText(getString(R.string.history)).setTabListener(this));
+		actionBar.addTab(actionBar.newTab()
+				.setText(getString(R.string.graph)).setTabListener(this));
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
+	}
 
-		mNameText = (EditText) findViewById(R.id.nameEditText);
-		mAddressText = (EditText) findViewById(R.id.addressEditText);
-		mElectricText = (EditText) findViewById(R.id.electricEditText);
-		mWaterText = (EditText) findViewById(R.id.waterEditText);
-
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		mBackupManager = new BackupManager(this);
-
-		String name = mPrefs.getString(
-				getString(R.string.pref_name), null);
-		String address = mPrefs.getString(
-				getString(R.string.pref_address), null);
-
-		if (!TextUtils.isEmpty(name)) {
-			mNameText.setText(name);
-			mAddressText.requestFocus();
-		}
-		if (!TextUtils.isEmpty(address)) {
-			mAddressText.setText(address);
-			mElectricText.requestFocus();
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mBillingService != null) {
+			unbindService(mServiceConn);
 		}
 	}
 
@@ -161,9 +156,6 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_history_graph:
-			launchHistoryActivity();
-			return true;
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
@@ -172,42 +164,32 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	private void launchHistoryActivity() {
-		switch (mHistoryFeature) {
+	private Fragment getGraphFragment() {
+		switch (mGraphFeature) {
 		case NOT_PURCHASED:
-			promptHistoryPurchase();
-			break;
+			return new PurchaseGraphFragment();
 		case PURCHASED:
-			startActivity(new Intent(this, HistoryGraphActivity.class));
-			break;
+			return new GraphFragment();
 		case UNKNOWN:
-			new CheckPurchasesTask().execute();
-			break;
+		default:
+			return new PurchaseGraphFragment();
 		}
 	}
 
-	private void promptHistoryPurchase() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.purchase_feature);
-		builder.setMessage(R.string.feature_description);
-		builder.setPositiveButton(android.R.string.yes,
-				new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				new PurchaseHistoryFeatureTask().execute();
-			}
-		});
-		builder.setNegativeButton(android.R.string.no, null);
-		builder.show();
+
+	@Override
+	public void purchaseGraph() {
+		new PurchaseGraphFeatureTask().execute();
 	}
 
-	private class PurchaseHistoryFeatureTask
+
+	private class PurchaseGraphFeatureTask
 	extends AsyncTask<Void, Void, PendingIntent> {
 		@Override
 		protected PendingIntent doInBackground(Void... params) {
 			try {
 				Bundle bundle = mBillingService.getBuyIntent(3,
-						getPackageName(), HistoryFeature.SKU, "inapp", null);
+						getPackageName(), GraphFeature.SKU, "inapp", null);
 				if (bundle.getInt("RESPONSE_CODE") == 0) {
 					return bundle.getParcelable("BUY_INTENT");
 				}
@@ -222,7 +204,7 @@ public class MainActivity extends ActionBarActivity {
 			if (result == null) return;
 			try {
 				startIntentSenderForResult(result.getIntentSender(),
-						PURCHASE_HISTORY_FEATURE_REQUEST,
+						PURCHASE_GRAPH_FEATURE_REQUEST,
 						new Intent(), 0, 0, 0);
 			} catch (SendIntentException e) {
 				e.printStackTrace();
@@ -234,15 +216,15 @@ public class MainActivity extends ActionBarActivity {
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		switch (requestCode) {
-		case PURCHASE_HISTORY_FEATURE_REQUEST:
+		case PURCHASE_GRAPH_FEATURE_REQUEST:
 			if (resultCode == RESULT_OK) {
 				try {
 					JSONObject jo = new JSONObject(
 							data.getStringExtra("INAPP_PURCHASE_DATA"));
-					if (jo.getString("productId").equals(HistoryFeature.SKU) &&
+					if (jo.getString("productId").equals(GraphFeature.SKU) &&
 							jo.getInt("purchaseState") == 0) {
-						mHistoryFeature = HistoryFeature.PURCHASED;
-						launchHistoryActivity();
+						mGraphFeature = GraphFeature.PURCHASED;
+						mViewPager.setCurrentItem(GRAPH_TAB);
 					}
 				}
 				catch (JSONException e) {
@@ -253,107 +235,45 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
+	private static final int SUBMIT_TAB = 0;
+	private static final int HISTORY_TAB = 1;
+	private static final int GRAPH_TAB = 2;
 
-		SharedPreferences.Editor prefsEditor = mPrefs.edit();
-		prefsEditor.putString(getString(R.string.pref_name),
-				mNameText.getText().toString());
-		prefsEditor.putString(getString(R.string.pref_address),
-				mAddressText.getText().toString());
-		prefsEditor.commit();
-	}
+	private class MyPageAdapter extends FragmentPagerAdapter {
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mBillingService != null) {
-			unbindService(mServiceConn);
+		public MyPageAdapter(FragmentManager fm) {
+			super(fm);
 		}
-	}
 
-	public void submitReadings(View v) {
-		new SaveReadingsTask().execute(getContentValues());
-		saveSubmittalTime();
-		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
-
-		Intent i = new Intent(Intent.ACTION_SEND);
-		i.setType("message/rfc822");
-		i.putExtra(Intent.EXTRA_EMAIL,
-				new String[]{getString(R.string.email_address)});
-		i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-		i.putExtra(Intent.EXTRA_TEXT, getMessageBody());
-
-		PackageManager pm = getPackageManager();
-		List<ResolveInfo> activities = pm.queryIntentActivities(i, 0);
-		boolean isIntentSafe = activities.size() > 0;
-
-		if (isIntentSafe) {
-			startActivity(i);
-		} else {
-			Toast.makeText(this,
-					R.string.error_no_email_client,
-					Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	private class SaveReadingsTask
-	extends AsyncTask<ContentValues, Void, Void> {
 		@Override
-		protected Void doInBackground(ContentValues... params) {
-			if (mDbHelper == null) {
-				mDbHelper = new ReadingsDbHelper(MainActivity.this);
+		public Fragment getItem(int index) {
+			switch (index) {
+			case SUBMIT_TAB:
+				return new SubmitFragment();
+			case HISTORY_TAB:
+				return new HistoryFragment();
+			case GRAPH_TAB:
+				return getGraphFragment();
+			default:
+				throw new IllegalArgumentException(
+						"No page fragment for positon " + index);
 			}
-			SQLiteDatabase db = mDbHelper.getWritableDatabase();
-			db.insert(Columns.TABLE_NAME, null, params[0]);
-			mDbHelper.close();
-			mBackupManager.dataChanged();
-			return null;
+		}
+
+		@Override
+		public int getCount() {
+			return 3;
 		}
 	}
 
-	private String getMessageBody() {
-		StringBuilder body = new StringBuilder();
-		body.append(mNameText.getText());
-		body.append("\n");
-		body.append(mAddressText.getText());
-		body.append("\n\n");
-		body.append(getString(R.string.electric));
-		body.append(" ");
-		body.append(mElectricText.getText());
-		body.append("\n");
-		body.append(getString(R.string.water));
-		body.append(" ");
-		body.append(mWaterText.getText());
-
-		return body.toString();
+	@Override
+	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+		mViewPager.setCurrentItem(tab.getPosition());
 	}
 
-	private void saveSubmittalTime() {
-		SharedPreferences.Editor prefsEditor = mPrefs.edit();
-		prefsEditor.putLong(getString(R.string.pref_last_submit),
-				System.currentTimeMillis());
-		prefsEditor.commit();
-	}
+	@Override
+	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
 
-	private ContentValues getContentValues() {
-		ContentValues vals = new ContentValues();
-		vals.put(Columns.DATE, System.currentTimeMillis());
-		vals.put(Columns.ELECTRIC, getIntFromEditText(mElectricText));
-		vals.put(Columns.WATER, getIntFromEditText(mWaterText));
-		vals.put(Columns.GAS, -1);
-		return vals;
-	}
-
-	private static int getIntFromEditText(EditText view) {
-		int result = -1;
-		if (TextUtils.isEmpty(view.getText())) return result;
-		try {
-			result = Integer.valueOf(view.getText().toString());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
+	@Override
+	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
 }

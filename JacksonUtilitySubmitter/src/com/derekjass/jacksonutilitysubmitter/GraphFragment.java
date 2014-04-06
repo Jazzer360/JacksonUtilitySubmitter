@@ -7,10 +7,12 @@ import java.util.Locale;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -19,7 +21,7 @@ import com.derekjass.jacksonutilitysubmitter.data.ReadingsLoader;
 import com.derekjass.jacksonutilitysubmitter.util.UsageStatistics;
 import com.derekjass.jacksonutilitysubmitter.views.BarGraph;
 
-public class HistoryGraphActivity extends ActionBarActivity
+public class GraphFragment extends Fragment
 implements LoaderCallbacks<Cursor> {
 
 	private ProgressBar mProgress;
@@ -31,22 +33,28 @@ implements LoaderCallbacks<Cursor> {
 	private UsageStatistics mWaterStats;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		setContentView(R.layout.activity_history_graph);
+		getLoaderManager().initLoader(0, null, this).forceLoad();
+	}
 
-		mProgress = (ProgressBar) findViewById(R.id.progress);
-		mGraphs = (LinearLayout) findViewById(R.id.graphs);
-		mElectricGraph = (BarGraph) findViewById(R.id.electricGraph);
-		mWaterGraph = (BarGraph) findViewById(R.id.waterGraph);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_graph,
+				container, false);
 
-		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+		mProgress = (ProgressBar) view.findViewById(R.id.progress);
+		mGraphs = (LinearLayout) view.findViewById(R.id.graphs);
+		mElectricGraph = (BarGraph) view.findViewById(R.id.electricGraph);
+		mWaterGraph = (BarGraph) view.findViewById(R.id.waterGraph);
+
+		return view;
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		return new ReadingsLoader(this);
+		return new ReadingsLoader(getActivity());
 	}
 
 	@Override

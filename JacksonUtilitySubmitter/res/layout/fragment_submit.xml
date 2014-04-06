@@ -1,0 +1,126 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:gravity="center"
+	android:orientation="vertical" >
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/name" />
+
+	<EditText
+		android:id="@+id/nameEditText"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp"
+		android:hint="@string/name_hint"
+		android:inputType="textPersonName" >
+
+		<requestFocus />
+	</EditText>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp"
+		android:text="@string/address" />
+
+	<EditText
+		android:id="@+id/addressEditText"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp"
+		android:hint="@string/address_hint"
+		android:inputType="textPostalAddress" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp"
+		android:layout_marginTop="20dp"
+		android:orientation="horizontal" >
+
+		<TextView
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:gravity="center_horizontal"
+			android:text="@string/electric" />
+
+		<TextView
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:gravity="center_horizontal"
+			android:text="@string/water" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp" >
+
+		<EditText
+			android:id="@+id/electricEditText"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:inputType="number"
+			android:nextFocusDown="@+id/waterEditText" />
+
+		<EditText
+			android:id="@+id/waterEditText"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:inputType="number" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/gasFields"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginRight="16dp"
+		android:layout_marginTop="20dp"
+		android:baselineAligned="false"
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:visibility="gone"
+		android:weightSum="1.0" >
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.5"
+			android:gravity="center"
+			android:orientation="vertical"
+			tools:ignore="UselessParent" >
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/gas" />
+
+			<EditText
+				android:id="@+id/gasEditText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="number" />
+		</LinearLayout>
+	</LinearLayout>
+
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp"
+		android:onClick="submitReadings"
+		android:text="@string/submit" />
+
+</LinearLayout>
