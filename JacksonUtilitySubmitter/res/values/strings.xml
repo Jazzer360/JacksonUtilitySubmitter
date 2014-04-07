@@ -25,6 +25,7 @@
 	<string name="include_gas">Enable gas field</string>
 	<string name="graph_electric">Electricity</string>
 	<string name="graph_water">Water</string>
+	<string name="graph_gas">Gas</string>
 	<string name="feature_description">
 <![CDATA[
 		<h1>Purchase feature?</h1>

@@ -1,4 +1,4 @@
-package com.derekjass.jacksonutilitysubmitter.data;
+package com.derekjass.jacksonutilitysubmitter.provider;
 
 import android.net.Uri;
 import android.provider.BaseColumns;

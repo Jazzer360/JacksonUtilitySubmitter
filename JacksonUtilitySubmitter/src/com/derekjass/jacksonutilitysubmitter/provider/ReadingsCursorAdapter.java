@@ -1,4 +1,4 @@
-package com.derekjass.jacksonutilitysubmitter.data;
+package com.derekjass.jacksonutilitysubmitter.provider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.derekjass.jacksonutilitysubmitter.R;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
 public class ReadingsCursorAdapter extends CursorAdapter {
 

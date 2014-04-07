@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
 public class SubmitFragment extends Fragment
 implements OnClickListener {
@@ -55,7 +55,7 @@ implements OnClickListener {
 		mWaterText = (EditText) view.findViewById(R.id.waterEditText);
 		mGasViews = (View) view.findViewById(R.id.gasFields);
 		mGasText = (EditText) mGasViews.findViewById(R.id.gasEditText);
-		
+
 		view.findViewById(R.id.submitButton).setOnClickListener(this);
 
 		String name = mPrefs.getString(

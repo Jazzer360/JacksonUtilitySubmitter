@@ -1,4 +1,4 @@
-package com.derekjass.jacksonutilitysubmitter.data;
+package com.derekjass.jacksonutilitysubmitter.provider;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +13,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.ParcelFileDescriptor;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
 public class ReadingsBackupAgent extends BackupAgent {
 

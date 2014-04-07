@@ -12,7 +12,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Environment;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
 public class BackupService extends IntentService {
 

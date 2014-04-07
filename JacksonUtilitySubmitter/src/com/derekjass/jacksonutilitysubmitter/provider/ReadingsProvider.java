@@ -1,6 +1,4 @@
-package com.derekjass.jacksonutilitysubmitter.data;
-
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+package com.derekjass.jacksonutilitysubmitter.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -14,8 +12,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
+
 public class ReadingsProvider extends ContentProvider {
-	
+
 	private static final class DatabaseHelper extends SQLiteOpenHelper {
 
 		private static final int DATABASE_VERSION = 1;
@@ -133,13 +133,13 @@ public class ReadingsProvider extends ContentProvider {
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long rowId = db.insert(table, null, values);
 
-		if (rowId > 0) {
+		if (rowId != -1) {
 			Uri matchUri = ContentUris.withAppendedId(uri, rowId);
 			getContext().getContentResolver().notifyChange(matchUri, null);
 			return matchUri;
+		} else {
+			throw new SQLException("Failed to insert row into " + uri);
 		}
-
-		throw new SQLException("Failed to insert row into " + uri);
 	}
 
 	@Override
@@ -154,8 +154,8 @@ public class ReadingsProvider extends ContentProvider {
 			break;
 		case URI_READING_ID:
 			table = Readings.TABLE_NAME;
-			where = Readings._ID + "=" + uri.getPathSegments().get(1);
-			if (selection != null) where += selection;
+			where = Readings._ID + "=" + uri.getLastPathSegment();
+			if (selection != null) where += " AND " + selection;
 			break;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -182,7 +182,7 @@ public class ReadingsProvider extends ContentProvider {
 			break;
 		case URI_READING_ID:
 			table = Readings.TABLE_NAME;
-			where = Readings._ID + "=" + uri.getPathSegments().get(1);
+			where = Readings._ID + "=" + uri.getLastPathSegment();
 			if (selection != null) where += " AND " + selection;
 			break;
 		default:

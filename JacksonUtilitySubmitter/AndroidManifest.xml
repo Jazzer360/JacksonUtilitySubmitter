@@ -25,7 +25,7 @@
 
 	<application
 		android:allowBackup="true"
-		android:backupAgent=".data.ReadingsBackupAgent"
+		android:backupAgent=".provider.ReadingsBackupAgent"
 		android:icon="@drawable/ic_launcher"
 		android:label="@string/app_name"
 		android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
@@ -66,7 +66,7 @@
 		</service>
 
 		<provider
-			android:name=".data.ReadingsProvider"
+			android:name=".provider.ReadingsProvider"
 			android:authorities="com.derekjass.jacksonutilitysubmitter.provider"
 			android:exported="true"
 			android:readPermission="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA"
