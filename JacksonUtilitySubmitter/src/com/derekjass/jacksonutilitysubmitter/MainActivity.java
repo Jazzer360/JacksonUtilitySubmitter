@@ -18,7 +18,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -114,6 +114,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 				mServiceConn, Context.BIND_AUTO_CREATE);
 
 		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mViewPager.setOffscreenPageLimit(2);
 		mViewPager.setAdapter(new MyPageAdapter(getSupportFragmentManager()));
 		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
@@ -224,10 +225,10 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 					if (jo.getString("productId").equals(GraphFeature.SKU) &&
 							jo.getInt("purchaseState") == 0) {
 						mGraphFeature = GraphFeature.PURCHASED;
+						mViewPager.getAdapter().notifyDataSetChanged();
 						mViewPager.setCurrentItem(GRAPH_TAB);
 					}
-				}
-				catch (JSONException e) {
+				} catch (JSONException e) {
 					e.printStackTrace();
 				}
 			}
@@ -239,7 +240,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 	private static final int HISTORY_TAB = 1;
 	private static final int GRAPH_TAB = 2;
 
-	private class MyPageAdapter extends FragmentPagerAdapter {
+	private class MyPageAdapter extends FragmentStatePagerAdapter {
 
 		public MyPageAdapter(FragmentManager fm) {
 			super(fm);
@@ -263,6 +264,15 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 		@Override
 		public int getCount() {
 			return 3;
+		}
+
+		@Override
+		public int getItemPosition(Object object) {
+			if (object instanceof PurchaseGraphFragment &&
+					mGraphFeature == GraphFeature.PURCHASED) {
+				return POSITION_NONE;
+			}
+			return super.getItemPosition(object);
 		}
 	}
 

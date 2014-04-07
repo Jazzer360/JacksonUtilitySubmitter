@@ -35,7 +35,7 @@ public class PurchaseGraphFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(
-				R.layout.fragment_purchase_feature, container, false);
+				R.layout.fragment_purchase_graph, container, false);
 
 		TextView desc = (TextView) view.findViewById(R.id.featureDescription);
 		desc.setText(Html.fromHtml(getString(R.string.feature_description)));

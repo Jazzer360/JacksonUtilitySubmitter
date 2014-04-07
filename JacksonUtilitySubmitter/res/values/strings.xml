@@ -34,5 +34,6 @@
 	</string>
 	<string name="purchase">Purchase</string>
 	<string name="error_billing">Problem occurred while contacting billing service.</string>
+	<string name="no_data">No readings saved yet</string>
 
 </resources>
