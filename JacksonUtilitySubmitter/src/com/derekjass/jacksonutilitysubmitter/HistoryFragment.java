@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.derekjass.jacksonutilitysubmitter.provider.ReadingsCursorAdapter;
 import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
+import com.derekjass.jacksonutilitysubmitter.provider.ReadingsCursorAdapter;
 
 public class HistoryFragment extends ListFragment
 implements LoaderCallbacks<Cursor> {
@@ -63,5 +63,4 @@ implements LoaderCallbacks<Cursor> {
 	public void onLoaderReset(Loader<Cursor> loader) {
 		mAdapter.swapCursor(null);
 	}
-
 }

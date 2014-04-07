@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Locale;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -26,7 +25,7 @@ import com.derekjass.jacksonutilitysubmitter.util.UsageStatistics;
 import com.derekjass.jacksonutilitysubmitter.views.BarGraph;
 
 public class GraphFragment extends Fragment
-implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
+implements LoaderCallbacks<Cursor> {
 
 	private ProgressBar mProgress;
 	private LinearLayout mGraphs;
@@ -45,7 +44,6 @@ implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 		super.onCreate(savedInstanceState);
 		getLoaderManager().initLoader(0, null, this).forceLoad();
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		mPrefs.registerOnSharedPreferenceChangeListener(this);
 	}
 
 	@Override
@@ -62,6 +60,17 @@ implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 		mGasText = (TextView) view.findViewById(R.id.gasText);
 
 		return view;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		boolean showGas = mPrefs.getBoolean(
+				getString(R.string.pref_enable_gas), false);
+
+		mGasGraph.setVisibility(showGas ? View.VISIBLE : View.GONE);
+		mGasText.setVisibility(showGas ? View.VISIBLE : View.GONE);
 	}
 
 	@Override
@@ -131,13 +140,5 @@ implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 				getString(R.string.pref_enable_gas), false);
 		mGasGraph.setVisibility(gasEnabled ? View.VISIBLE : View.GONE);
 		mGasText.setVisibility(gasEnabled ? View.VISIBLE : View.GONE);
-	}
-
-	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-			String key) {
-		if (key.equals(getString(R.string.pref_enable_gas))) {
-			setupGraphs();
-		}
 	}
 }
