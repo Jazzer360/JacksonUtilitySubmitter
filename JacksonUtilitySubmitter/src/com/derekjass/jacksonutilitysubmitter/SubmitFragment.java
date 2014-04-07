@@ -2,16 +2,12 @@ package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.List;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
-
 import android.app.backup.BackupManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,11 +15,15 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class SubmitFragment extends Fragment {
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
+
+public class SubmitFragment extends Fragment
+implements OnClickListener {
 
 	private EditText mNameText;
 	private EditText mAddressText;
@@ -33,8 +33,6 @@ public class SubmitFragment extends Fragment {
 	private EditText mGasText;
 
 	private SharedPreferences mPrefs;
-
-	private ReadingsDbHelper mDbHelper;
 
 	private BackupManager mBackupManager;
 
@@ -57,6 +55,8 @@ public class SubmitFragment extends Fragment {
 		mWaterText = (EditText) view.findViewById(R.id.waterEditText);
 		mGasViews = (View) view.findViewById(R.id.gasFields);
 		mGasText = (EditText) mGasViews.findViewById(R.id.gasEditText);
+		
+		view.findViewById(R.id.submitButton).setOnClickListener(this);
 
 		String name = mPrefs.getString(
 				getString(R.string.pref_name), null);
@@ -101,7 +101,8 @@ public class SubmitFragment extends Fragment {
 		prefsEditor.commit();
 	}
 
-	public void submitReadings(View v) {
+	@Override
+	public void onClick(View v) {
 		new SaveReadingsTask().execute(getContentValues());
 		saveSubmittalTime();
 		getActivity().sendBroadcast(
@@ -131,12 +132,8 @@ public class SubmitFragment extends Fragment {
 	extends AsyncTask<ContentValues, Void, Void> {
 		@Override
 		protected Void doInBackground(ContentValues... params) {
-			if (mDbHelper == null) {
-				mDbHelper = new ReadingsDbHelper(getActivity());
-			}
-			SQLiteDatabase db = mDbHelper.getWritableDatabase();
-			db.insert(Columns.TABLE_NAME, null, params[0]);
-			mDbHelper.close();
+			getActivity().getContentResolver().insert(
+					Readings.CONTENT_URI, params[0]);
 			mBackupManager.dataChanged();
 			return null;
 		}
@@ -168,10 +165,10 @@ public class SubmitFragment extends Fragment {
 
 	private ContentValues getContentValues() {
 		ContentValues vals = new ContentValues();
-		vals.put(Columns.DATE, System.currentTimeMillis());
-		vals.put(Columns.ELECTRIC, getIntFromEditText(mElectricText));
-		vals.put(Columns.WATER, getIntFromEditText(mWaterText));
-		vals.put(Columns.GAS, getIntFromEditText(mGasText));
+		vals.put(Readings.COLUMN_DATE, System.currentTimeMillis());
+		vals.put(Readings.COLUMN_ELECTRIC, getIntFromEditText(mElectricText));
+		vals.put(Readings.COLUMN_WATER, getIntFromEditText(mWaterText));
+		vals.put(Readings.COLUMN_GAS, getIntFromEditText(mGasText));
 		return vals;
 	}
 

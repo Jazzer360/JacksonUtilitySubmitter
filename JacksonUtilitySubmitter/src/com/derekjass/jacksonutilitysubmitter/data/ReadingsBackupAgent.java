@@ -11,10 +11,9 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.ParcelFileDescriptor;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
 
 public class ReadingsBackupAgent extends BackupAgent {
 
@@ -23,16 +22,12 @@ public class ReadingsBackupAgent extends BackupAgent {
 	@Override
 	public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
 			ParcelFileDescriptor newState) throws IOException {
-		ReadingsDbHelper helper = new ReadingsDbHelper(getApplicationContext());
-		SQLiteDatabase readingsDb = helper.getReadableDatabase();
-		Cursor cursor = readingsDb.query(
-				Columns.TABLE_NAME,
+		Cursor cursor = getContentResolver().query(
+				Readings.CONTENT_URI,
 				null,
 				null,
 				null,
-				null,
-				null,
-				Columns.DATE + " ASC");
+				null);
 
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(byteStream);
@@ -40,10 +35,10 @@ public class ReadingsBackupAgent extends BackupAgent {
 		int recordCount = cursor.getCount();
 		out.writeInt(recordCount);
 
-		int dateCol = cursor.getColumnIndexOrThrow(Columns.DATE);
-		int electricCol = cursor.getColumnIndexOrThrow(Columns.ELECTRIC);
-		int waterCol = cursor.getColumnIndexOrThrow(Columns.WATER);
-		int gasCol = cursor.getColumnIndexOrThrow(Columns.GAS);
+		int dateCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_DATE);
+		int electricCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
+		int waterCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_WATER);
+		int gasCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_GAS);
 
 		cursor.moveToFirst();
 
@@ -61,7 +56,6 @@ public class ReadingsBackupAgent extends BackupAgent {
 		data.writeEntityData(buffer, len);
 
 		cursor.close();
-		helper.close();
 	}
 
 	@Override
@@ -78,22 +72,16 @@ public class ReadingsBackupAgent extends BackupAgent {
 						dataBuf);
 				DataInputStream in = new DataInputStream(byteStream);
 
-				ReadingsDbHelper helper = new ReadingsDbHelper(
-						getApplicationContext());
-				SQLiteDatabase db = helper.getWritableDatabase();
-
 				int recordCount = in.readInt();
 				for (int i = 0; i < recordCount; i++) {
 					ContentValues cv = new ContentValues();
-					cv.put(Columns.DATE, in.readLong());
-					cv.put(Columns.ELECTRIC, in.readInt());
-					cv.put(Columns.WATER, in.readInt());
-					cv.put(Columns.GAS, in.readInt());
+					cv.put(Readings.COLUMN_DATE, in.readLong());
+					cv.put(Readings.COLUMN_ELECTRIC, in.readInt());
+					cv.put(Readings.COLUMN_WATER, in.readInt());
+					cv.put(Readings.COLUMN_GAS, in.readInt());
 
-					db.insert(Columns.TABLE_NAME, null, cv);
+					getContentResolver().insert(Readings.CONTENT_URI, cv);
 				}
-
-				helper.close();
 			} else {
 				data.skipEntityData();
 			}

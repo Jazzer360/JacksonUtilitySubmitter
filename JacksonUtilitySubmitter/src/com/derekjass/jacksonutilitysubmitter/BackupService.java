@@ -12,8 +12,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Environment;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
 
 public class BackupService extends IntentService {
 
@@ -25,22 +24,19 @@ public class BackupService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		if (!isExternalStorageWritable()) return;
 
-		ReadingsDbHelper dbHelper = new ReadingsDbHelper(this);
-		Cursor data = dbHelper.getReadableDatabase().query(
-				Columns.TABLE_NAME,
+		Cursor data = getContentResolver().query(
+				Readings.CONTENT_URI,
 				null,
 				null,
 				null,
-				null,
-				null,
-				Columns.DATE + " ASC");
+				null);
 
 		if (!data.moveToFirst()) return;
 
-		int dateCol = data.getColumnIndexOrThrow(Columns.DATE);
-		int electricCol = data.getColumnIndexOrThrow(Columns.ELECTRIC);
-		int waterCol = data.getColumnIndexOrThrow(Columns.WATER);
-		int gasCol = data.getColumnIndexOrThrow(Columns.GAS);
+		int dateCol = data.getColumnIndexOrThrow(Readings.COLUMN_DATE);
+		int electricCol = data.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
+		int waterCol = data.getColumnIndexOrThrow(Readings.COLUMN_WATER);
+		int gasCol = data.getColumnIndexOrThrow(Readings.COLUMN_GAS);
 
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(buffer);
@@ -57,7 +53,6 @@ public class BackupService extends IntentService {
 			e.printStackTrace();
 		} finally {
 			data.close();
-			dbHelper.close();
 		}
 
 		File dir = new File(Environment.getExternalStorageDirectory(),

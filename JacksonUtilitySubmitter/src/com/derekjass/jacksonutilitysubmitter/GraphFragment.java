@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsDbHelper.Columns;
-import com.derekjass.jacksonutilitysubmitter.data.ReadingsLoader;
+import com.derekjass.jacksonutilitysubmitter.data.ReadingsContract.Readings;
 import com.derekjass.jacksonutilitysubmitter.util.UsageStatistics;
 import com.derekjass.jacksonutilitysubmitter.views.BarGraph;
 
@@ -54,14 +54,15 @@ implements LoaderCallbacks<Cursor> {
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		return new ReadingsLoader(getActivity());
+		return new CursorLoader(getActivity(),
+				Readings.CONTENT_URI, null, null, null, null);
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		int dateIndex = data.getColumnIndexOrThrow(Columns.DATE);
-		int electricIndex = data.getColumnIndexOrThrow(Columns.ELECTRIC);
-		int waterIndex = data.getColumnIndexOrThrow(Columns.WATER);
+		int dateIndex = data.getColumnIndexOrThrow(Readings.COLUMN_DATE);
+		int electricIndex = data.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
+		int waterIndex = data.getColumnIndexOrThrow(Readings.COLUMN_WATER);
 		mElectricStats = new UsageStatistics(data, dateIndex, electricIndex);
 		mWaterStats = new UsageStatistics(data, dateIndex, waterIndex);
 

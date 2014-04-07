@@ -117,10 +117,10 @@
 	</LinearLayout>
 
 	<Button
+		android:id="@+id/submitButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="20dp"
-		android:onClick="submitReadings"
 		android:text="@string/submit" />
 
 </LinearLayout>

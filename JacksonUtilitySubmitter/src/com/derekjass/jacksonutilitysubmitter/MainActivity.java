@@ -86,7 +86,9 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 
 		@Override
 		protected void onPostExecute(Boolean checkWasSuccessful) {
-			if (!checkWasSuccessful) {
+			if (checkWasSuccessful) {
+				mViewPager.getAdapter().notifyDataSetChanged();
+			} else {
 				Toast.makeText(MainActivity.this,
 						R.string.error_billing,
 						Toast.LENGTH_SHORT).show();
@@ -173,7 +175,8 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 			return new GraphFragment();
 		case UNKNOWN:
 		default:
-			return new PurchaseGraphFragment();
+			new CheckPurchasesTask().execute();
+			return new Fragment();
 		}
 	}
 
@@ -232,7 +235,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 					e.printStackTrace();
 				}
 			}
-			break;
+			return;
 		}
 	}
 

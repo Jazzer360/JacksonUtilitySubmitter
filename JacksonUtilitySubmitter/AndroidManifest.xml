@@ -8,6 +8,15 @@
 		android:minSdkVersion="9"
 		android:targetSdkVersion="19" />
 
+	<permission
+		android:name="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA"
+		android:protectionLevel="signature" />
+	<permission
+		android:name="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA"
+		android:protectionLevel="signature" />
+
+	<uses-permission android:name="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA" />
+	<uses-permission android:name="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -55,6 +64,14 @@
 
 		<service android:name=".BackupService" >
 		</service>
+
+		<provider
+			android:name=".data.ReadingsProvider"
+			android:authorities="com.derekjass.jacksonutilitysubmitter.provider"
+			android:exported="true"
+			android:readPermission="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA"
+			android:writePermission="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA" >
+		</provider>
 	</application>
 
 </manifest>
