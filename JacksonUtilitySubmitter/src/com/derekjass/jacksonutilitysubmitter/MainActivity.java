@@ -91,7 +91,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 			} else {
 				Toast.makeText(MainActivity.this,
 						R.string.error_billing,
-						Toast.LENGTH_SHORT).show();
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	}

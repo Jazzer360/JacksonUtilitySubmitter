@@ -36,7 +36,7 @@ public class ReadingsBackupAgent extends BackupAgent {
 		out.writeInt(recordCount);
 
 		int dateCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_DATE);
-		int electricCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
+		int elecCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
 		int waterCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_WATER);
 		int gasCol = cursor.getColumnIndexOrThrow(Readings.COLUMN_GAS);
 
@@ -44,7 +44,7 @@ public class ReadingsBackupAgent extends BackupAgent {
 
 		for (int i = 0; i < recordCount; i++) {
 			out.writeLong(cursor.getLong(dateCol));
-			out.writeInt(cursor.getInt(electricCol));
+			out.writeInt(cursor.getInt(elecCol));
 			out.writeInt(cursor.getInt(waterCol));
 			out.writeInt(cursor.getInt(gasCol));
 			cursor.moveToNext();
