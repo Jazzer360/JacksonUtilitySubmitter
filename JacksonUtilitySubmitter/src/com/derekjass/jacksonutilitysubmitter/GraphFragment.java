@@ -135,10 +135,5 @@ implements LoaderCallbacks<Cursor> {
 		mElectricGraph.setValues(electricValues);
 		mWaterGraph.setValues(waterValues);
 		mGasGraph.setValues(gasValues);
-
-		boolean gasEnabled = mPrefs.getBoolean(
-				getString(R.string.pref_enable_gas), false);
-		mGasGraph.setVisibility(gasEnabled ? View.VISIBLE : View.GONE);
-		mGasText.setVisibility(gasEnabled ? View.VISIBLE : View.GONE);
 	}
 }

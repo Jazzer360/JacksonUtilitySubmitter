@@ -1,8 +1,7 @@
 package com.derekjass.jacksonutilitysubmitter.provider;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -17,7 +16,7 @@ import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
 public class ReadingsCursorAdapter extends CursorAdapter {
 
-	static SimpleDateFormat sSdf = new SimpleDateFormat("M-d-yyyy", Locale.US);
+	static DateFormat sSdf = DateFormat.getDateInstance();
 
 	private LayoutInflater mInflater;
 
