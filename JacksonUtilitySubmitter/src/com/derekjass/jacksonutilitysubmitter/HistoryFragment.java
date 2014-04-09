@@ -42,94 +42,117 @@ implements LoaderCallbacks<Cursor> {
 
 		public static final String URI_KEY = "uri";
 
-		private DatePicker datePicker;
+		private DatePicker mDatePicker;
 
-		private EditText electricText;
-		private EditText waterText;
-		private EditText gasText;
+		private EditText mElectricText;
+		private EditText mWaterText;
+		private EditText mGasText;
 
-		private View gasViews;
+		private View mGasViews;
+
+		private boolean mInEditMode;
+		private Uri mUri;
+		private OnClickListener mOkButton = new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ContentValues cv = new ContentValues();
+				Calendar c = Calendar.getInstance();
+				c.clear();
+				c.set(mDatePicker.getYear(), mDatePicker.getMonth(),
+						mDatePicker.getDayOfMonth(), 12, 0);
+				cv.put(Readings.COLUMN_DATE, c.getTimeInMillis());
+				cv.put(Readings.COLUMN_ELECTRIC,
+						getIntFromEditText(mElectricText));
+				cv.put(Readings.COLUMN_WATER,
+						getIntFromEditText(mWaterText));
+				cv.put(Readings.COLUMN_GAS,
+						getIntFromEditText(mGasText));
+				if (mInEditMode) {
+					getActivity().getContentResolver().update(
+							mUri, cv, null, null);
+				} else {
+					getActivity().getContentResolver().insert(
+							Readings.CONTENT_URI, cv);
+				}
+			}
+		};
+		private OnClickListener mDeleteButton = new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				new DialogFragment() {
+					@Override
+					public Dialog onCreateDialog(Bundle savedInstanceState) {
+						AlertDialog.Builder builder =
+								new AlertDialog.Builder(getActivity());
+						builder.setTitle(R.string.delete_warning_title);
+						builder.setMessage(R.string.delete_warning);
+						builder.setPositiveButton(android.R.string.yes,
+								new OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								getActivity().getContentResolver().delete(
+										mUri, null, null);
+							}
+						});
+						builder.setNegativeButton(android.R.string.no, null);
+						return builder.create();
+					}
+
+				}.show(getFragmentManager(), "ConfirmDelete");
+			}
+		};
 
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			Bundle args = getArguments();
-			final Uri uri = (Uri) (args != null
-					? args.getParcelable(URI_KEY) : null);
-			final boolean editing = uri == null ? false : true;
+			if (args != null) {
+				mInEditMode = true;
+				mUri = args.getParcelable(URI_KEY);
+			} else {
+				mInEditMode = false;
+			}
 
 			LayoutInflater inflater = getActivity().getLayoutInflater();
 
 			View v = inflater.inflate(R.layout.dialog_edit_history,
 					(ViewGroup) getView(), false);
 
-			datePicker = (DatePicker) v.findViewById(R.id.datePicker);
-			electricText = (EditText) v.findViewById(R.id.electricReading);
-			waterText = (EditText) v.findViewById(R.id.waterReading);
-			gasText = (EditText) v.findViewById(R.id.gasReading);
-			gasViews = (View) v.findViewById(R.id.gasFields);
+			mDatePicker = (DatePicker) v.findViewById(R.id.datePicker);
+			mElectricText = (EditText) v.findViewById(R.id.electricReading);
+			mWaterText = (EditText) v.findViewById(R.id.waterReading);
+			mGasText = (EditText) v.findViewById(R.id.gasReading);
+			mGasViews = (View) v.findViewById(R.id.gasFields);
 
-			if (editing) setupViews(uri);
+			if (mInEditMode) setupViews();
 
 			SharedPreferences prefs = PreferenceManager
 					.getDefaultSharedPreferences(getActivity());
 			boolean gasEnabled = prefs
 					.getBoolean(getString(R.string.pref_enable_gas), false);
-			if (gasEnabled || !TextUtils.isEmpty(gasText.getText())) {
-				gasViews.setVisibility(View.VISIBLE);
+			if (gasEnabled || !TextUtils.isEmpty(mGasText.getText())) {
+				mGasViews.setVisibility(View.VISIBLE);
 			} else {
-				gasViews.setVisibility(View.GONE);
+				mGasViews.setVisibility(View.GONE);
 			}
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(
 					getActivity());
-			builder.setTitle(editing
+			builder.setTitle(mInEditMode
 					? R.string.edit_history : R.string.add_history);
 			builder.setView(v);
-			builder.setNegativeButton(android.R.string.cancel,
-					new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {}
-			});
-			if (editing) {
-				builder.setNeutralButton(R.string.delete,
-						new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					getActivity().getContentResolver().delete(uri, null, null);
-				}
-			});
+			builder.setNegativeButton(android.R.string.cancel, null);
+			if (mInEditMode) {
+				builder.setNeutralButton(R.string.delete, mDeleteButton);
 			}
-			builder.setPositiveButton(android.R.string.ok,
-					new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					ContentValues cv = new ContentValues();
-					Calendar c = Calendar.getInstance();
-					c.clear();
-					c.set(datePicker.getYear(), datePicker.getMonth(),
-							datePicker.getDayOfMonth());
-					cv.put(Readings.COLUMN_DATE, c.getTimeInMillis());
-					cv.put(Readings.COLUMN_ELECTRIC,
-							getIntFromEditText(electricText));
-					cv.put(Readings.COLUMN_WATER,
-							getIntFromEditText(waterText));
-					cv.put(Readings.COLUMN_GAS,
-							getIntFromEditText(gasText));
-					if (editing) {
-						getActivity().getContentResolver().update(
-								uri, cv, null, null);
-					} else {
-						getActivity().getContentResolver().insert(uri, cv);
-					}
-				}
-			});
+			builder.setPositiveButton(android.R.string.ok, mOkButton);
 
 			return builder.create();
 		}
 
-		private void setupViews(Uri uri) {
+		private void setupViews() {
 			Cursor c = getActivity().getContentResolver()
-					.query(uri, null, null, null, null);
+					.query(mUri, null, null, null, null);
 			int dateCol = c.getColumnIndexOrThrow(Readings.COLUMN_DATE);
 			int electricCol = c.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
 			int waterCol = c.getColumnIndexOrThrow(Readings.COLUMN_WATER);
@@ -143,17 +166,17 @@ implements LoaderCallbacks<Cursor> {
 			int gas = c.getInt(gasCol);
 			c.close();
 
-			datePicker.updateDate(cal.get(Calendar.YEAR),
+			mDatePicker.updateDate(cal.get(Calendar.YEAR),
 					cal.get(Calendar.MONTH),
 					cal.get(Calendar.DAY_OF_MONTH));
 			if (electric >= 0) {
-				electricText.setText(String.valueOf(electric));
+				mElectricText.setText(String.valueOf(electric));
 			}
 			if (water >= 0) {
-				waterText.setText(String.valueOf(water));
+				mWaterText.setText(String.valueOf(water));
 			}
 			if (gas >= 0) {
-				gasText.setText(String.valueOf(gas));
+				mGasText.setText(String.valueOf(gas));
 			}
 		}
 	}
