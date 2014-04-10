@@ -2,7 +2,6 @@ package com.derekjass.jacksonutilitysubmitter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Locale;
 
 import android.content.SharedPreferences;
@@ -124,9 +123,6 @@ implements LoaderCallbacks<Cursor> {
 			gasValues.add(mGasStats.getUsage(start, end));
 		}
 
-		mElectricGraph.setMaxValue(Collections.max(electricValues));
-		mWaterGraph.setMaxValue(Collections.max(waterValues));
-		mGasGraph.setMaxValue(Collections.max(gasValues));
 		mElectricGraph.setLabels(labels);
 		mWaterGraph.setLabels(labels);
 		mGasGraph.setLabels(labels);

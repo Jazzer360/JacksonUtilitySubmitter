@@ -1,7 +1,7 @@
 package com.derekjass.jacksonutilitysubmitter.views;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
@@ -13,16 +13,31 @@ import android.graphics.Paint.Align;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
+import android.view.animation.AnimationUtils;
 
 import com.derekjass.jacksonutilitysubmitter.R;
 
 public class BarGraph extends View {
+
+	private class BarView extends View {
+
+		public BarView(Context context) {
+			super(context);
+		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+			mBarDrawable.setColorFilter(mBarColorFilter);
+			mBarDrawable.setBounds(getLeft(), getTop(),
+					getRight(), getBottom());
+			mBarDrawable.draw(canvas);
+		}
+	}
 
 	private static class Gridline {
 		public PointF mStart;
@@ -43,34 +58,30 @@ public class BarGraph extends View {
 					labelPaint);
 		}
 	}
-	
-	private static class BarView extends View {
-		@Override
-		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-			// TODO Auto-generated method stub
-			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		}
-	}
 
-	private static final int GRID_SPACING_DP = 30;
-	private static final int GRIDLINE_PROTRUSION_DP = 5;
-	private static final int BAR_WIDTH_DP = 30;
-	private static final float BAR_TO_SPACING_RATIO = 0.7f;
+	private static final int DEFAULT_GRID_SPACING_DP = 30;
+	private static final int DEFAULT_GRIDLINE_PROTRUSION_DP = 5;
+	private static final int DEFAULT_BAR_WIDTH_DP = 30;
+	private static final float DEFAULT_BAR_TO_SPACING_RATIO = 0.7f;
 
 	private float mDensity;
 
-	private Paint mBarPaint;
 	private Paint mAxisPaint;
 	private Paint mGridlinePaint;
 	private Paint mGridlineTextPaint;
 	private Paint mLabelPaint;
 
+	private List<Integer> mValues;
 	private List<String> mLabels;
+	private List<Gridline> mGridlines;
+	private List<View> mBars;
+
 	private int mBarCount;
-	private int mBarColor;
+	private LightingColorFilter mBarColorFilter;
+	private Drawable mBarDrawable;
+	private Animation mBarAnimation;
 	private int mMaxValue;
 
-	private List<Gridline> mGridlines;
 	private RectF mViewBounds;
 	private RectF mGraphBounds;
 
@@ -80,6 +91,12 @@ public class BarGraph extends View {
 
 	public BarGraph(Context context, AttributeSet attrs) {
 		super(context, attrs);
+
+		mGridlines = new ArrayList<Gridline>();
+		mBars = new ArrayList<View>();
+		mViewBounds = new RectF();
+		mGraphBounds = new RectF();
+
 		mDensity = getResources().getDisplayMetrics().density;
 
 		TypedArray a = context.getTheme().obtainStyledAttributes(
@@ -90,13 +107,12 @@ public class BarGraph extends View {
 		try {
 			setBarCount(a.getInteger(R.styleable.BarGraph_barCount, 1));
 			setBarColor(a.getColor(R.styleable.BarGraph_barColor, 0xFFFFFFFF));
+			setBarDrawable(a.getDrawable(R.styleable.BarGraph_barDrawable));
+			setBarAnimation(a.getResourceId(
+					R.styleable.BarGraph_barAnimation, -1));
 		} finally {
 			a.recycle();
 		}
-
-		mGridlines = new ArrayList<Gridline>();
-		mViewBounds = new RectF();
-		mGraphBounds = new RectF();
 
 		mAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAxisPaint.setColor(0xFF444444);
@@ -129,19 +145,37 @@ public class BarGraph extends View {
 	}
 
 	@Override
+	protected void onLayout(boolean changed, int left, int top, int right,
+			int bottom) {
+		float totalBarWidth = mGraphBounds.width() / mBarCount;
+		float barWidth = totalBarWidth * DEFAULT_BAR_TO_SPACING_RATIO;
+		float startOffset = (totalBarWidth - barWidth) / 2;
+
+		for (int i = 0; i < Math.min(mValues.size(), mBarCount) ; i++) {
+			float l = mGraphBounds.left + startOffset + totalBarWidth * i;
+			float r = l + barWidth;
+			float pct = mValues.get(i) / (float) mMaxValue;
+			float height = (mGraphBounds.bottom - mGraphBounds.top) * (1 - pct);
+			mBars.get(i).layout((int) l, (int) (mGraphBounds.top + height),
+					(int) r, (int) mGraphBounds.bottom);
+		}
+	}
+
+	@Override
 	protected void onDraw(Canvas canvas) {
-		generateGridlines();
 		drawGridlines(canvas);
 		drawLabels(canvas);
 		drawTicks(canvas);
 		drawBars(canvas);
 		drawAxes(canvas);
 	}
-	
+
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		mGraphBounds.set(getLeftPadding(), 0, w, h - getBottomPadding());
+		mGraphBounds.set(getLeftLabelsWidth(), 0,
+				w, h - getBottomLabelsWidth());
 		mViewBounds.set(0, 0, w, h);
+		generateGridlines();
 	}
 
 	private void drawGridlines(Canvas canvas) {
@@ -167,15 +201,19 @@ public class BarGraph extends View {
 		for (int i = 1; i < mBarCount; i++) {
 			float x = mGraphBounds.left + i * spacing;
 			canvas.drawLine(x, mGraphBounds.bottom,
-					x, mGraphBounds.bottom + px(GRIDLINE_PROTRUSION_DP),
+					x, mGraphBounds.bottom + px(DEFAULT_GRIDLINE_PROTRUSION_DP),
 					mGridlinePaint);
 		}
 	}
 
 	private void drawBars(Canvas canvas) {
-		
+		for (View v : mBars) {
+			v.setAnimation(mBarAnimation);
+			v.draw(canvas);
+		}
+		if (mBarAnimation != null) mBarAnimation.startNow();
 	}
-	
+
 	private void drawAxes(Canvas canvas) {
 		canvas.drawLine(mGraphBounds.left, mGraphBounds.top,
 				mGraphBounds.left, mGraphBounds.bottom,
@@ -187,55 +225,53 @@ public class BarGraph extends View {
 
 	@Override
 	protected int getSuggestedMinimumWidth() {
-		float label = getLeftPadding();
-		float bars = px(BAR_WIDTH_DP) / BAR_TO_SPACING_RATIO * mBarCount;
+		float label = getLeftLabelsWidth();
+		float bars = px(DEFAULT_BAR_WIDTH_DP) / DEFAULT_BAR_TO_SPACING_RATIO
+				* mBarCount;
 		return (int) Math.ceil(label + bars);
 	}
 
-	private float getLeftPadding() {
+	private float getLeftLabelsWidth() {
 		float label = mGridlineTextPaint
 				.measureText(String.valueOf(mMaxValue));
-		float gridline = px(GRIDLINE_PROTRUSION_DP);
+		float gridline = px(DEFAULT_GRIDLINE_PROTRUSION_DP);
 		return label + gridline;
 	}
 
 	@Override
 	protected int getSuggestedMinimumHeight() {
-		float bars = px(GRID_SPACING_DP) * 3;
-		float label = getBottomPadding();
+		float label = getBottomLabelsWidth();
+		float bars = px(DEFAULT_GRID_SPACING_DP) * 3;
 		return (int) Math.ceil(bars + label);
 	}
 
-	private float getBottomPadding() {
+	private float getBottomLabelsWidth() {
 		return mLabelPaint.getFontSpacing();
 	}
 
 	public void setValues(ArrayList<Integer> values) {
-		for (int i = 0; i < Math.min(mBarCount, values.size()); i++) {
-			AnimatingBarView v = (AnimatingBarView) getChildAt(i);
-			float scale = (float) values.get(i) / mMaxValue;
-			if (v.mScale != scale) v.setScale(scale);
-		}
+		setMaxValue(Math.max(Collections.max(values), 1));
+		mValues = Collections.unmodifiableList(new ArrayList<Integer>(values));
+		invalidate();
 	}
 
 	public void setLabels(ArrayList<String> labels) {
-		mLabels = labels;
+		mLabels = Collections.unmodifiableList(new ArrayList<String>(labels));
 		invalidate();
 	}
 
 	public void setBarCount(int num) {
-		if (getChildCount() == num) {
-			return;
-		} else if (getChildCount() < num) {
-			do {
-				AnimatingBarView v = new AnimatingBarView(getContext()).animate();
-				v.setColor(mBarColor);
-				addView(v);
-			} while (getChildCount() < num);
-		} else {
-			do {
-				removeViewAt(getChildCount() - 1);
-			} while (getChildCount() > num);
+		if (num < 1) throw new IllegalArgumentException(
+				"Bar count must be > 0");
+
+		if (num > mBarCount) {
+			while (mBars.size() < num) {
+				mBars.add(new BarView(getContext()));
+			}
+		} else if (num < mBarCount) {
+			while (mBars.size() > num) {
+				mBars.remove(mBars.size() - 1);
+			}
 		}
 		mBarCount = num;
 		requestLayout();
@@ -243,23 +279,47 @@ public class BarGraph extends View {
 	}
 
 	public void setBarColor(int color) {
-		for (int i = 0; i < mBarCount; i++) {
-			((AnimatingBarView) getChildAt(i)).setColor(color);
-		}
-		mBarColor = color;
+		mBarColorFilter = new LightingColorFilter(color, 0);
 		invalidate();
 	}
 
-	public void setMaxValue(int max) {
-		mMaxValue = max;
+	public void setBarDrawable(Drawable drawable) {
+		if (drawable != null) {
+			mBarDrawable = drawable;
+		} else {
+			mBarDrawable = new ShapeDrawable(new RectShape());
+		}
+
+		invalidate();
+	}
+
+	public void setBarAnimation(Animation anim) {
+		mBarAnimation = anim;
+	}
+
+	public void setBarAnimation(int resourceId) {
+		if (resourceId != -1) {
+			setBarAnimation(
+					AnimationUtils.loadAnimation(getContext(), resourceId));
+		}
+	}
+
+	private void setMaxValue(int max) {
+		if (max <= 0) {
+			mMaxValue = 1;
+		} else {
+			mMaxValue = max;
+		}
+		generateGridlines();
 		invalidate();
 	}
 
 	private void generateGridlines() {
 		mGridlines.clear();
 		int[] gridlineValues = getGridlineValues();
+		if (gridlineValues == null) return;
 		float gridHeight = mGraphBounds.height();
-		float startX = mGraphBounds.left - px(GRIDLINE_PROTRUSION_DP);
+		float startX = mGraphBounds.left - px(DEFAULT_GRIDLINE_PROTRUSION_DP);
 		for (int gridlineValue : gridlineValues) {
 			float lineY = mGraphBounds.bottom -
 					(float) gridlineValue / mMaxValue * gridHeight;
@@ -275,7 +335,8 @@ public class BarGraph extends View {
 		float height = mGraphBounds.height();
 		float headroom = -mGridlineTextPaint.ascent() / 2;
 		int maxValue = (int) (mMaxValue * ((height - headroom) / height));
-		int numLines = (int) (height / px(GRID_SPACING_DP));
+		int numLines = (int) (height / px(DEFAULT_GRID_SPACING_DP));
+		if (numLines == 0) return null;
 		int increment = Math.max(maxValue / numLines, 1);
 		while ((numLines + 1) * increment <= maxValue) {
 			numLines++;
