@@ -22,61 +22,7 @@ import android.view.animation.ScaleAnimation;
 
 import com.derekjass.jacksonutilitysubmitter.R;
 
-public class BarGraph extends ViewGroup {
-
-	private static class AnimatingBarView extends View {
-
-		private static SparseArray<WeakReference<Drawable>> sBackgrounds =
-				new SparseArray<WeakReference<Drawable>>();
-
-		private float mScale;
-
-		public AnimatingBarView(Context context) {
-			this(context, null);
-		}
-
-		public AnimatingBarView(Context context, AttributeSet attrs) {
-			super(context, attrs);
-			setBackgroundResource(R.drawable.bar);
-			Animation anim = new ScaleAnimation(
-					1f, 1f,
-					0f, 0f,
-					Animation.RELATIVE_TO_SELF, 0f,
-					Animation.RELATIVE_TO_SELF, 1f);
-			anim.setFillAfter(true);
-			anim.setDuration(0);
-			startAnimation(anim);
-			mScale = 0f;
-		}
-
-		public void setScale(float scale) {
-			Animation anim = new ScaleAnimation(
-					1f, 1f,
-					mScale, scale,
-					Animation.RELATIVE_TO_SELF, 0f,
-					Animation.RELATIVE_TO_SELF, 1f);
-			anim.setFillAfter(true);
-			anim.setDuration(400);
-			anim.setInterpolator(getContext(),
-					android.R.anim.accelerate_decelerate_interpolator);
-			startAnimation(anim);
-			mScale = scale;
-		}
-
-		@SuppressWarnings("deprecation")
-		public void setColor(int color) {
-			WeakReference<Drawable> ref = sBackgrounds.get(color);
-			Drawable bg = null;
-			if (ref != null) bg = ref.get();
-
-			if (bg == null) {
-				bg = getResources().getDrawable(R.drawable.bar).mutate();
-				bg.setColorFilter(new LightingColorFilter(color, 0));
-				sBackgrounds.put(color, new WeakReference<Drawable>(bg));
-			}
-			setBackgroundDrawable(bg);
-		}
-	}
+public class BarGraph extends View {
 
 	private static class Gridline {
 		public PointF mStart;
@@ -97,6 +43,14 @@ public class BarGraph extends ViewGroup {
 					labelPaint);
 		}
 	}
+	
+	private static class BarView extends View {
+		@Override
+		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+			// TODO Auto-generated method stub
+			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		}
+	}
 
 	private static final int GRID_SPACING_DP = 30;
 	private static final int GRIDLINE_PROTRUSION_DP = 5;
@@ -105,6 +59,7 @@ public class BarGraph extends ViewGroup {
 
 	private float mDensity;
 
+	private Paint mBarPaint;
 	private Paint mAxisPaint;
 	private Paint mGridlinePaint;
 	private Paint mGridlineTextPaint;
@@ -174,41 +129,19 @@ public class BarGraph extends ViewGroup {
 	}
 
 	@Override
+	protected void onDraw(Canvas canvas) {
+		generateGridlines();
+		drawGridlines(canvas);
+		drawLabels(canvas);
+		drawTicks(canvas);
+		drawBars(canvas);
+		drawAxes(canvas);
+	}
+	
+	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		mGraphBounds.set(getLeftPadding(), 0, w, h - getBottomPadding());
 		mViewBounds.set(0, 0, w, h);
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		float totalBarWidth = mGraphBounds.width() / mBarCount;
-		float barWidth = totalBarWidth * BAR_TO_SPACING_RATIO;
-		float startOffset = (totalBarWidth - barWidth) / 2;
-
-		for (int i = 0; i < getChildCount(); i++) {
-			float left = mGraphBounds.left + startOffset + totalBarWidth * i;
-			float right = left + barWidth;
-			getChildAt(i).layout((int) left, (int) mGraphBounds.top,
-					(int) right, (int) mGraphBounds.bottom);
-		}
-
-	}
-
-	@Override
-	protected void dispatchDraw(Canvas canvas) {
-		generateGridlines();
-		drawGridlines(canvas);
-		drawTicks(canvas);
-		drawLabels(canvas);
-
-		super.dispatchDraw(canvas);
-
-		canvas.drawLine(mGraphBounds.left, mGraphBounds.top,
-				mGraphBounds.left, mGraphBounds.bottom,
-				mAxisPaint);
-		canvas.drawLine(mGraphBounds.left, mGraphBounds.bottom,
-				mGraphBounds.right, mGraphBounds.bottom,
-				mAxisPaint);
 	}
 
 	private void drawGridlines(Canvas canvas) {
@@ -237,6 +170,19 @@ public class BarGraph extends ViewGroup {
 					x, mGraphBounds.bottom + px(GRIDLINE_PROTRUSION_DP),
 					mGridlinePaint);
 		}
+	}
+
+	private void drawBars(Canvas canvas) {
+		
+	}
+	
+	private void drawAxes(Canvas canvas) {
+		canvas.drawLine(mGraphBounds.left, mGraphBounds.top,
+				mGraphBounds.left, mGraphBounds.bottom,
+				mAxisPaint);
+		canvas.drawLine(mGraphBounds.left, mGraphBounds.bottom,
+				mGraphBounds.right, mGraphBounds.bottom,
+				mAxisPaint);
 	}
 
 	@Override
@@ -282,7 +228,7 @@ public class BarGraph extends ViewGroup {
 			return;
 		} else if (getChildCount() < num) {
 			do {
-				AnimatingBarView v = new AnimatingBarView(getContext());
+				AnimatingBarView v = new AnimatingBarView(getContext()).animate();
 				v.setColor(mBarColor);
 				addView(v);
 			} while (getChildCount() < num);

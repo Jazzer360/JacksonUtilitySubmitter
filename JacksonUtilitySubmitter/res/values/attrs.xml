@@ -4,6 +4,8 @@
 	<declare-styleable name="BarGraph">
 		<attr name="barCount" format="integer" />
 		<attr name="barColor" format="reference|color" />
+		<attr name="barDrawable" format="reference"/>
+		<attr name="barAnimation" format="reference"/>
 	</declare-styleable>
 
 </resources>
