@@ -39,6 +39,7 @@ implements LoaderCallbacks<Cursor> {
 	private UsageStatistics mGasStats;
 
 	private SharedPreferences mPrefs;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
