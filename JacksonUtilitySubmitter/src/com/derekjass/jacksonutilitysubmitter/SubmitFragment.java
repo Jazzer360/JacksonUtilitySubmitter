@@ -172,7 +172,7 @@ implements OnClickListener {
 		return vals;
 	}
 
-	private static int getIntFromEditText(EditText view) {
+	static int getIntFromEditText(EditText view) {
 		int result = -1;
 		if (TextUtils.isEmpty(view.getText())) return result;
 		try {

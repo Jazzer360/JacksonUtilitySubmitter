@@ -91,7 +91,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 			} else {
 				Toast.makeText(MainActivity.this,
 						R.string.error_billing,
-						Toast.LENGTH_SHORT).show();
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -176,7 +176,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 		case UNKNOWN:
 		default:
 			new CheckPurchasesTask().execute();
-			return new Fragment();
+			return new PurchaseGraphFragment();
 		}
 	}
 
@@ -271,8 +271,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 
 		@Override
 		public int getItemPosition(Object object) {
-			if (object instanceof PurchaseGraphFragment &&
-					mGraphFeature == GraphFeature.PURCHASED) {
+			if (object instanceof PurchaseGraphFragment) {
 				return POSITION_NONE;
 			}
 			return super.getItemPosition(object);
