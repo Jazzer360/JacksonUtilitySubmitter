@@ -27,7 +27,7 @@ public class ReadingsProvider extends ContentProvider {
 						Readings.COLUMN_DATE + " INTEGER," +
 						Readings.COLUMN_ELECTRIC + " INTEGER," +
 						Readings.COLUMN_WATER + " INTEGER," +
-						Readings.COLUMN_GAS + " Integer)";
+						Readings.COLUMN_GAS + " INTEGER)";
 
 		private DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
