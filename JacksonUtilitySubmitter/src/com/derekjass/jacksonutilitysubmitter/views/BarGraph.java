@@ -301,8 +301,7 @@ public class BarGraph extends View {
 		} else {
 			mMaxValue = max;
 		}
-		mGraphBounds.set(getLeftLabelsWidth(), 0,
-				mViewBounds.right, mViewBounds.bottom - getBottomLabelsWidth());
+		mGraphBounds.left = getLeftLabelsWidth();
 		generateGridlines();
 		invalidate();
 	}
