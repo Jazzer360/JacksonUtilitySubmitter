@@ -192,6 +192,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 		@Override
 		protected PendingIntent doInBackground(Void... params) {
 			try {
+				if (mBillingService == null) return null;
 				Bundle bundle = mBillingService.getBuyIntent(3,
 						getPackageName(), GraphFeature.SKU, "inapp", null);
 				if (bundle.getInt("RESPONSE_CODE") == 0) {
@@ -205,7 +206,12 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 
 		@Override
 		protected void onPostExecute(PendingIntent result) {
-			if (result == null) return;
+			if (result == null) {
+				Toast.makeText(MainActivity.this,
+						R.string.error_billing,
+						Toast.LENGTH_LONG).show();
+				return;
+			}
 			try {
 				startIntentSenderForResult(result.getIntentSender(),
 						PURCHASE_GRAPH_FEATURE_REQUEST,
