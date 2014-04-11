@@ -65,8 +65,6 @@ public class BarGraph extends View {
 	private static final int DEFAULT_BAR_WIDTH_DP = 30;
 	private static final float DEFAULT_BAR_TO_SPACING_RATIO = 0.7f;
 
-	private float mDensity;
-
 	private Paint mAxisPaint;
 	private Paint mGridlinePaint;
 	private Paint mGridlineTextPaint;
@@ -97,8 +95,6 @@ public class BarGraph extends View {
 		mViewBounds = new RectF();
 		mGraphBounds = new RectF();
 
-		mDensity = getResources().getDisplayMetrics().density;
-
 		TypedArray a = context.getTheme().obtainStyledAttributes(
 				attrs,
 				R.styleable.BarGraph,
@@ -114,7 +110,7 @@ public class BarGraph extends View {
 
 		mAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAxisPaint.setColor(0xFF444444);
-		mAxisPaint.setStrokeWidth(1f * mDensity);
+		mAxisPaint.setStrokeWidth(1f * getDensity());
 
 		mGridlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mGridlinePaint.setColor(0xFF888888);
@@ -122,12 +118,12 @@ public class BarGraph extends View {
 
 		mGridlineTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mGridlineTextPaint.setColor(0xFF888888);
-		mGridlineTextPaint.setTextSize(8f * mDensity);
+		mGridlineTextPaint.setTextSize(8f * getDensity());
 		mGridlineTextPaint.setTextAlign(Align.RIGHT);
 
 		mLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mLabelPaint.setColor(0xFF888888);
-		mLabelPaint.setTextSize(10f * mDensity);
+		mLabelPaint.setTextSize(10f * getDensity());
 		mLabelPaint.setTextAlign(Align.CENTER);
 	}
 
@@ -278,6 +274,11 @@ public class BarGraph extends View {
 		invalidate();
 	}
 
+	public void clearBarColor() {
+		mBarColorFilter = null;
+		invalidate();
+	}
+
 	public void setBarDrawable(Drawable drawable) {
 		if (drawable != null) {
 			mBarDrawable = drawable;
@@ -339,7 +340,11 @@ public class BarGraph extends View {
 	}
 
 	private float px(int dp) {
-		return dp * mDensity;
+		return dp * getDensity();
+	}
+
+	private float getDensity() {
+		return getResources().getDisplayMetrics().density;
 	}
 
 	private static int myResolveSizeAndState(int size, int measureSpec,
