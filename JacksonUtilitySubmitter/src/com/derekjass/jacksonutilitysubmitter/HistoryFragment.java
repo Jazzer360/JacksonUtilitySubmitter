@@ -7,6 +7,7 @@ import java.util.Calendar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
@@ -79,6 +80,7 @@ implements LoaderCallbacks<Cursor> {
 		private OnClickListener mDeleteButton = new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				final Context c = getActivity();
 				AlertDialog.Builder builder =
 						new AlertDialog.Builder(getActivity());
 				builder.setTitle(R.string.delete_warning_title);
@@ -87,7 +89,7 @@ implements LoaderCallbacks<Cursor> {
 						new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						getActivity().getContentResolver().delete(
+						c.getContentResolver().delete(
 								mUri, null, null);
 					}
 				});

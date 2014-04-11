@@ -327,7 +327,7 @@ public class BarGraph extends View {
 		float headroom = -mGridlineTextPaint.ascent() / 2.5f;
 		int maxValue = (int) (mMaxValue * ((height - headroom) / height));
 		int numLines = (int) (height / px(DEFAULT_GRID_SPACING_DP));
-		if (numLines == 0) return null;
+		if (maxValue == 0 || numLines == 0) return null;
 		int increment = Math.max(maxValue / numLines, 1);
 		while ((numLines + 1) * increment <= maxValue) {
 			numLines++;
