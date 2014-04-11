@@ -31,8 +31,9 @@
 			android:layout_height="0dp"
 			android:layout_margin="6dp"
 			android:layout_weight="1"
-			app:barColor="#FFFFBB33"
-			app:barCount="12" />
+			app:barColor="#FFBB33"
+			app:barCount="12"
+			app:barDrawable="@drawable/bar" />
 
 		<TextView
 			android:layout_width="wrap_content"
@@ -47,8 +48,9 @@
 			android:layout_height="0dp"
 			android:layout_margin="6dp"
 			android:layout_weight="1"
-			app:barColor="#FF33B5E5"
-			app:barCount="12" />
+			app:barColor="#33B5E5"
+			app:barCount="12"
+			app:barDrawable="@drawable/bar" />
 
 		<TextView
 			android:id="@+id/gasText"
@@ -64,8 +66,9 @@
 			android:layout_height="0dp"
 			android:layout_margin="6dp"
 			android:layout_weight="1"
-			app:barColor="#FF33B5E5"
-			app:barCount="12" />
+			app:barColor="#99CC00"
+			app:barCount="12"
+			app:barDrawable="@drawable/bar" />
 	</LinearLayout>
 
 </FrameLayout>

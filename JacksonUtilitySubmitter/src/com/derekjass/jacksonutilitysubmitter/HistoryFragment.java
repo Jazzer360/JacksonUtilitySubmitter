@@ -79,27 +79,20 @@ implements LoaderCallbacks<Cursor> {
 		private OnClickListener mDeleteButton = new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				new DialogFragment() {
+				AlertDialog.Builder builder =
+						new AlertDialog.Builder(getActivity());
+				builder.setTitle(R.string.delete_warning_title);
+				builder.setMessage(R.string.delete_warning);
+				builder.setPositiveButton(android.R.string.yes,
+						new OnClickListener() {
 					@Override
-					public Dialog onCreateDialog(Bundle savedInstanceState) {
-						AlertDialog.Builder builder =
-								new AlertDialog.Builder(getActivity());
-						builder.setTitle(R.string.delete_warning_title);
-						builder.setMessage(R.string.delete_warning);
-						builder.setPositiveButton(android.R.string.yes,
-								new OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								getActivity().getContentResolver().delete(
-										mUri, null, null);
-							}
-						});
-						builder.setNegativeButton(android.R.string.no, null);
-						return builder.create();
+					public void onClick(DialogInterface dialog, int which) {
+						getActivity().getContentResolver().delete(
+								mUri, null, null);
 					}
-
-				}.show(getFragmentManager(), "ConfirmDelete");
+				});
+				builder.setNegativeButton(android.R.string.no, null);
+				builder.show();
 			}
 		};
 

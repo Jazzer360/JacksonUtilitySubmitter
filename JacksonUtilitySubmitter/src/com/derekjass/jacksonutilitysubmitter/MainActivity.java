@@ -176,7 +176,7 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 		case UNKNOWN:
 		default:
 			new CheckPurchasesTask().execute();
-			return new PurchaseGraphFragment();
+			return new GraphFragment();
 		}
 	}
 

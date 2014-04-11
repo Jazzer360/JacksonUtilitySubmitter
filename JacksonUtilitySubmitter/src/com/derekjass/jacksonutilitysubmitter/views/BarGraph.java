@@ -17,8 +17,6 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.derekjass.jacksonutilitysubmitter.R;
 
@@ -36,10 +34,11 @@ public class BarGraph extends View {
 			mBarDrawable.setBounds(getLeft(), getTop(),
 					getRight(), getBottom());
 			mBarDrawable.draw(canvas);
+			mBarDrawable.clearColorFilter();
 		}
 	}
 
-	private static class Gridline {
+	private class Gridline {
 		public PointF mStart;
 		public PointF mEnd;
 		public String mLabel;
@@ -51,11 +50,13 @@ public class BarGraph extends View {
 			mLabel = label;
 		}
 
-		public void draw(Canvas canvas, Paint linePaint, Paint labelPaint) {
-			canvas.drawLine(mStart.x, mStart.y, mEnd.x, mEnd.y, linePaint);
+		public void draw(Canvas canvas) {
+			canvas.drawLine(mStart.x, mStart.y,
+					mEnd.x, mEnd.y,
+					mGridlinePaint);
 			canvas.drawText(mLabel,
-					mStart.x, mStart.y + -labelPaint.ascent() / 2,
-					labelPaint);
+					mStart.x, mStart.y + -mGridlineTextPaint.ascent() / 2.5f,
+					mGridlineTextPaint);
 		}
 	}
 
@@ -79,7 +80,6 @@ public class BarGraph extends View {
 	private int mBarCount;
 	private LightingColorFilter mBarColorFilter;
 	private Drawable mBarDrawable;
-	private Animation mBarAnimation;
 	private int mMaxValue;
 
 	private RectF mViewBounds;
@@ -106,10 +106,8 @@ public class BarGraph extends View {
 
 		try {
 			setBarCount(a.getInteger(R.styleable.BarGraph_barCount, 1));
-			setBarColor(a.getColor(R.styleable.BarGraph_barColor, 0xFFFFFFFF));
+			setBarColor(a.getColor(R.styleable.BarGraph_barColor, 0xFF888888));
 			setBarDrawable(a.getDrawable(R.styleable.BarGraph_barDrawable));
-			setBarAnimation(a.getResourceId(
-					R.styleable.BarGraph_barAnimation, -1));
 		} finally {
 			a.recycle();
 		}
@@ -180,7 +178,7 @@ public class BarGraph extends View {
 
 	private void drawGridlines(Canvas canvas) {
 		for (Gridline line : mGridlines) {
-			line.draw(canvas, mGridlinePaint, mGridlineTextPaint);
+			line.draw(canvas);
 		}
 	}
 
@@ -208,10 +206,8 @@ public class BarGraph extends View {
 
 	private void drawBars(Canvas canvas) {
 		for (View v : mBars) {
-			v.setAnimation(mBarAnimation);
 			v.draw(canvas);
 		}
-		if (mBarAnimation != null) mBarAnimation.startNow();
 	}
 
 	private void drawAxes(Canvas canvas) {
@@ -252,7 +248,7 @@ public class BarGraph extends View {
 	public void setValues(ArrayList<Integer> values) {
 		setMaxValue(Math.max(Collections.max(values), 1));
 		mValues = Collections.unmodifiableList(new ArrayList<Integer>(values));
-		invalidate();
+		requestLayout();
 	}
 
 	public void setLabels(ArrayList<String> labels) {
@@ -275,7 +271,6 @@ public class BarGraph extends View {
 		}
 		mBarCount = num;
 		requestLayout();
-		invalidate();
 	}
 
 	public void setBarColor(int color) {
@@ -287,21 +282,16 @@ public class BarGraph extends View {
 		if (drawable != null) {
 			mBarDrawable = drawable;
 		} else {
-			mBarDrawable = new ShapeDrawable(new RectShape());
+			ShapeDrawable d = new ShapeDrawable(new RectShape());
+			d.getPaint().setColor(0xFFFFFFFF);
+			mBarDrawable = d;
 		}
 
 		invalidate();
 	}
 
-	public void setBarAnimation(Animation anim) {
-		mBarAnimation = anim;
-	}
-
-	public void setBarAnimation(int resourceId) {
-		if (resourceId != -1) {
-			setBarAnimation(
-					AnimationUtils.loadAnimation(getContext(), resourceId));
-		}
+	public void setBarDrawable(int resId) {
+		getResources().getDrawable(resId);
 	}
 
 	private void setMaxValue(int max) {
@@ -333,7 +323,7 @@ public class BarGraph extends View {
 
 	private int[] getGridlineValues() {
 		float height = mGraphBounds.height();
-		float headroom = -mGridlineTextPaint.ascent() / 2;
+		float headroom = -mGridlineTextPaint.ascent() / 2.5f;
 		int maxValue = (int) (mMaxValue * ((height - headroom) / height));
 		int numLines = (int) (height / px(DEFAULT_GRID_SPACING_DP));
 		if (numLines == 0) return null;
