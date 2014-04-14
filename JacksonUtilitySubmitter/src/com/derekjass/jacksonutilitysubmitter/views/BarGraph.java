@@ -292,7 +292,7 @@ public class BarGraph extends View {
 	}
 
 	public void setBarDrawable(int resId) {
-		getResources().getDrawable(resId);
+		setBarDrawable(getResources().getDrawable(resId));
 	}
 
 	private void setMaxValue(int max) {
