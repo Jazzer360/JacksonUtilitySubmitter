@@ -1,20 +1,9 @@
 package com.derekjass.jacksonutilitysubmitter;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
-import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,81 +16,24 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.android.vending.billing.IInAppBillingService;
+import com.derekjass.iabhelper.BillingHelper;
+import com.derekjass.iabhelper.Product;
+import com.derekjass.iabhelper.Purchase;
 import com.derekjass.jacksonutilitysubmitter.PurchaseGraphFragment.GraphPurchasingAgent;
 
-public class MainActivity extends ActionBarActivity
-implements ActionBar.TabListener, GraphPurchasingAgent {
+public class MainActivity extends ActionBarActivity implements
+		ActionBar.TabListener, GraphPurchasingAgent, BillingHelper.Callbacks {
 
 	private static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
 
-	private IInAppBillingService mBillingService;
-	private ServiceConnection mServiceConn = new ServiceConnection() {
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mBillingService = null;
-		}
-
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			mBillingService = IInAppBillingService.Stub.asInterface(service);
-			new CheckPurchasesTask().execute();
-		}
-	};
-
-	private class CheckPurchasesTask
-	extends AsyncTask<Void, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				if (mBillingService == null) return false;
-				Bundle purchases = mBillingService.getPurchases(
-						3, getPackageName(), "inapp", null);
-				if (purchases.getInt("RESPONSE_CODE") != 0) return false;
-				ArrayList<String> details = purchases.getStringArrayList(
-						"INAPP_PURCHASE_DATA_LIST");
-
-				for (String detail : details) {
-					JSONObject jo = new JSONObject(detail);
-					if (jo.getInt("purchaseState") == 0 &&
-							jo.getString("productId").equals(
-									GraphFeature.SKU)) {
-						mGraphFeature = GraphFeature.PURCHASED;
-					}
-				}
-
-				if (mGraphFeature == GraphFeature.UNKNOWN) {
-					mGraphFeature = GraphFeature.NOT_PURCHASED;
-				}
-				return true;
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return false;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean checkWasSuccessful) {
-			if (checkWasSuccessful) {
-				mViewPager.getAdapter().notifyDataSetChanged();
-			} else {
-				Toast.makeText(MainActivity.this,
-						R.string.error_billing,
-						Toast.LENGTH_LONG).show();
-			}
-		}
-	}
-
-	private volatile GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
 	private enum GraphFeature {
 		PURCHASED, NOT_PURCHASED, UNKNOWN;
 		public static final String SKU = "history_feature";
 	}
 
+	private volatile GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
+	private BillingHelper mBillingHelper;
 	private ViewPager mViewPager;
 
 	@Override
@@ -111,10 +43,6 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-		bindService(new
-				Intent("com.android.vending.billing.InAppBillingService.BIND"),
-				mServiceConn, Context.BIND_AUTO_CREATE);
-
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setOffscreenPageLimit(2);
 		mViewPager.setAdapter(new MyPageAdapter(getSupportFragmentManager()));
@@ -123,30 +51,40 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 			public void onPageSelected(int position) {
 				getSupportActionBar().setSelectedNavigationItem(position);
 			}
+
 			@Override
 			public void onPageScrolled(int pos, float offset, int pixels) {}
+
 			@Override
 			public void onPageScrollStateChanged(int state) {}
 		});
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		actionBar.addTab(actionBar.newTab()
-				.setText(getString(R.string.submit)).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(getString(R.string.submit))
+				.setTabListener(this));
 		actionBar.addTab(actionBar.newTab()
 				.setText(getString(R.string.history)).setTabListener(this));
-		actionBar.addTab(actionBar.newTab()
-				.setText(getString(R.string.graph)).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(getString(R.string.graph))
+				.setTabListener(this));
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
+
+		mBillingHelper = BillingHelper
+				.newManagedProductHelper(this, this, null);
 	}
 
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mBillingService != null) {
-			unbindService(mServiceConn);
-		}
+	protected void onStart() {
+		super.onStart();
+		mBillingHelper.connect();
+		mBillingHelper.queryPurchases();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mBillingHelper.disconnect();
 	}
 
 	@Override
@@ -175,81 +113,27 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 			return new GraphFragment();
 		case UNKNOWN:
 		default:
-			new CheckPurchasesTask().execute();
-			return new PurchaseGraphFragment();
+			return new Fragment();
 		}
 	}
-
 
 	@Override
 	public void purchaseGraph() {
-		new PurchaseGraphFeatureTask().execute();
-	}
-
-
-	private class PurchaseGraphFeatureTask
-	extends AsyncTask<Void, Void, PendingIntent> {
-		@Override
-		protected PendingIntent doInBackground(Void... params) {
-			try {
-				if (mBillingService == null) return null;
-				Bundle bundle = mBillingService.getBuyIntent(3,
-						getPackageName(), GraphFeature.SKU, "inapp", null);
-				if (bundle.getInt("RESPONSE_CODE") == 0) {
-					return bundle.getParcelable("BUY_INTENT");
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(PendingIntent result) {
-			if (result == null) {
-				Toast.makeText(MainActivity.this,
-						R.string.error_billing,
-						Toast.LENGTH_LONG).show();
-				return;
-			}
-			try {
-				startIntentSenderForResult(result.getIntentSender(),
-						PURCHASE_GRAPH_FEATURE_REQUEST,
-						new Intent(), 0, 0, 0);
-			} catch (SendIntentException e) {
-				e.printStackTrace();
-			}
-		}
+		mBillingHelper.purchaseProduct(GraphFeature.SKU, null, this,
+				PURCHASE_GRAPH_FEATURE_REQUEST);
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent data) {
-		switch (requestCode) {
-		case PURCHASE_GRAPH_FEATURE_REQUEST:
-			if (resultCode == RESULT_OK) {
-				try {
-					JSONObject jo = new JSONObject(
-							data.getStringExtra("INAPP_PURCHASE_DATA"));
-					if (jo.getString("productId").equals(GraphFeature.SKU) &&
-							jo.getInt("purchaseState") == 0) {
-						mGraphFeature = GraphFeature.PURCHASED;
-						mViewPager.getAdapter().notifyDataSetChanged();
-						mViewPager.setCurrentItem(GRAPH_TAB);
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-			return;
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == PURCHASE_GRAPH_FEATURE_REQUEST) {
+			mBillingHelper.handleActivityResult(requestCode, resultCode, data);
 		}
 	}
 
-	private static final int SUBMIT_TAB = 0;
-	private static final int HISTORY_TAB = 1;
-	private static final int GRAPH_TAB = 2;
-
 	private class MyPageAdapter extends FragmentStatePagerAdapter {
+		private static final int SUBMIT_TAB = 0;
+		private static final int HISTORY_TAB = 1;
+		private static final int GRAPH_TAB = 2;
 
 		public MyPageAdapter(FragmentManager fm) {
 			super(fm);
@@ -294,4 +178,35 @@ implements ActionBar.TabListener, GraphPurchasingAgent {
 
 	@Override
 	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+
+	@Override
+	public void onProductsQueried(List<Product> products) {}
+
+	@Override
+	public void onPurchasesQueried(List<Purchase> purchases) {
+		for (Purchase purchase : purchases) {
+			mBillingHelper.consumePurchase(purchase);
+			if (purchase.isPurchased()
+					&& purchase.getProductId().equals(GraphFeature.SKU)) {
+				mGraphFeature = GraphFeature.PURCHASED;
+			}
+		}
+		if (mGraphFeature == GraphFeature.UNKNOWN) {
+			mGraphFeature = GraphFeature.NOT_PURCHASED;
+		}
+		mViewPager.getAdapter().notifyDataSetChanged();
+	}
+
+	@Override
+	public void onProductPurchased(Purchase purchase) {
+		if (purchase.isPurchased()) {
+			if (purchase.getProductId().equals(GraphFeature.SKU)) {
+				mGraphFeature = GraphFeature.PURCHASED;
+				mViewPager.getAdapter().notifyDataSetChanged();
+			}
+		}
+	}
+
+	@Override
+	public void onPurchaseConsumed(Purchase purchase) {}
 }
