@@ -18,21 +18,61 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.derekjass.iabhelper.BillingHelper;
-import com.derekjass.iabhelper.Product;
+import com.derekjass.iabhelper.BillingHelper.BillingError;
+import com.derekjass.iabhelper.BillingHelper.OnProductPurchasedListener;
+import com.derekjass.iabhelper.BillingHelper.OnPurchasesQueriedListener;
 import com.derekjass.iabhelper.Purchase;
 import com.derekjass.jacksonutilitysubmitter.PurchaseGraphFragment.GraphPurchasingAgent;
 
 public class MainActivity extends ActionBarActivity implements
-		ActionBar.TabListener, GraphPurchasingAgent, BillingHelper.Callbacks {
+		ActionBar.TabListener, GraphPurchasingAgent {
 
-	private static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
+	private class MyPageAdapter extends FragmentStatePagerAdapter {
+		private static final int SUBMIT_TAB = 0;
+		private static final int HISTORY_TAB = 1;
+		private static final int GRAPH_TAB = 2;
+
+		public MyPageAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int index) {
+			switch (index) {
+			case SUBMIT_TAB:
+				return new SubmitFragment();
+			case HISTORY_TAB:
+				return new HistoryFragment();
+			case GRAPH_TAB:
+				return getGraphFragment();
+			default:
+				throw new IllegalArgumentException(
+						"No page fragment for positon " + index);
+			}
+		}
+
+		@Override
+		public int getCount() {
+			return 3;
+		}
+
+		@Override
+		public int getItemPosition(Object object) {
+			if (object instanceof PurchaseGraphFragment) {
+				return POSITION_NONE;
+			}
+			return super.getItemPosition(object);
+		}
+	}
 
 	private enum GraphFeature {
 		PURCHASED, NOT_PURCHASED, UNKNOWN;
 		public static final String SKU = "history_feature";
 	}
 
-	private volatile GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
+	private static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
+
+	private GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
 	private BillingHelper mBillingHelper;
 	private ViewPager mViewPager;
 
@@ -70,15 +110,29 @@ public class MainActivity extends ActionBarActivity implements
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
 
-		mBillingHelper = BillingHelper
-				.newManagedProductHelper(this, this, null);
+		mBillingHelper = BillingHelper.newManagedProductHelper(this);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		mBillingHelper.connect();
-		mBillingHelper.queryPurchases();
+		mBillingHelper.queryPurchases(new OnPurchasesQueriedListener() {
+			@Override
+			public void onError(BillingError error) {}
+
+			@Override
+			public void onPurchasesQueried(List<Purchase> purchases) {
+				mGraphFeature = GraphFeature.NOT_PURCHASED;
+				for (Purchase purchase : purchases) {
+					if (purchase.isPurchased()
+							&& purchase.getProductId().equals(GraphFeature.SKU)) {
+						mGraphFeature = GraphFeature.PURCHASED;
+					}
+				}
+				mViewPager.getAdapter().notifyDataSetChanged();
+			}
+		});
 	}
 
 	@Override
@@ -120,51 +174,28 @@ public class MainActivity extends ActionBarActivity implements
 	@Override
 	public void purchaseGraph() {
 		mBillingHelper.purchaseProduct(GraphFeature.SKU, null, this,
-				PURCHASE_GRAPH_FEATURE_REQUEST);
+				PURCHASE_GRAPH_FEATURE_REQUEST,
+				new OnProductPurchasedListener() {
+					@Override
+					public void onError(BillingError error) {}
+
+					@Override
+					public void onProductPurchased(Purchase purchase) {
+						if (purchase.isPurchased()) {
+							if (purchase.getProductId()
+									.equals(GraphFeature.SKU)) {
+								mGraphFeature = GraphFeature.PURCHASED;
+								mViewPager.getAdapter().notifyDataSetChanged();
+							}
+						}
+					}
+				});
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == PURCHASE_GRAPH_FEATURE_REQUEST) {
 			mBillingHelper.handleActivityResult(requestCode, resultCode, data);
-		}
-	}
-
-	private class MyPageAdapter extends FragmentStatePagerAdapter {
-		private static final int SUBMIT_TAB = 0;
-		private static final int HISTORY_TAB = 1;
-		private static final int GRAPH_TAB = 2;
-
-		public MyPageAdapter(FragmentManager fm) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int index) {
-			switch (index) {
-			case SUBMIT_TAB:
-				return new SubmitFragment();
-			case HISTORY_TAB:
-				return new HistoryFragment();
-			case GRAPH_TAB:
-				return getGraphFragment();
-			default:
-				throw new IllegalArgumentException(
-						"No page fragment for positon " + index);
-			}
-		}
-
-		@Override
-		public int getCount() {
-			return 3;
-		}
-
-		@Override
-		public int getItemPosition(Object object) {
-			if (object instanceof PurchaseGraphFragment) {
-				return POSITION_NONE;
-			}
-			return super.getItemPosition(object);
 		}
 	}
 
@@ -178,35 +209,4 @@ public class MainActivity extends ActionBarActivity implements
 
 	@Override
 	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
-
-	@Override
-	public void onProductsQueried(List<Product> products) {}
-
-	@Override
-	public void onPurchasesQueried(List<Purchase> purchases) {
-		for (Purchase purchase : purchases) {
-			mBillingHelper.consumePurchase(purchase);
-			if (purchase.isPurchased()
-					&& purchase.getProductId().equals(GraphFeature.SKU)) {
-				mGraphFeature = GraphFeature.PURCHASED;
-			}
-		}
-		if (mGraphFeature == GraphFeature.UNKNOWN) {
-			mGraphFeature = GraphFeature.NOT_PURCHASED;
-		}
-		mViewPager.getAdapter().notifyDataSetChanged();
-	}
-
-	@Override
-	public void onProductPurchased(Purchase purchase) {
-		if (purchase.isPurchased()) {
-			if (purchase.getProductId().equals(GraphFeature.SKU)) {
-				mGraphFeature = GraphFeature.PURCHASED;
-				mViewPager.getAdapter().notifyDataSetChanged();
-			}
-		}
-	}
-
-	@Override
-	public void onPurchaseConsumed(Purchase purchase) {}
 }
