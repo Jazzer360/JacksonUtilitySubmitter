@@ -9,10 +9,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -55,14 +57,6 @@ public class MainActivity extends ActionBarActivity implements
 		public int getCount() {
 			return 3;
 		}
-
-		@Override
-		public int getItemPosition(Object object) {
-			if (object instanceof PurchaseGraphFragment) {
-				return POSITION_NONE;
-			}
-			return super.getItemPosition(object);
-		}
 	}
 
 	private enum GraphFeature {
@@ -75,6 +69,7 @@ public class MainActivity extends ActionBarActivity implements
 	private GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
 	private BillingHelper mBillingHelper;
 	private ViewPager mViewPager;
+	private PagerAdapter mPagerAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +78,10 @@ public class MainActivity extends ActionBarActivity implements
 
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+		mPagerAdapter = new MyPageAdapter(getSupportFragmentManager());
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setOffscreenPageLimit(2);
-		mViewPager.setAdapter(new MyPageAdapter(getSupportFragmentManager()));
+		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -119,7 +115,9 @@ public class MainActivity extends ActionBarActivity implements
 		mBillingHelper.connect();
 		mBillingHelper.queryPurchases(new OnPurchasesQueriedListener() {
 			@Override
-			public void onError(BillingError error) {}
+			public void onError(BillingError error) {
+				Log.w("BillingError", error.name());
+			}
 
 			@Override
 			public void onPurchasesQueried(List<Purchase> purchases) {
@@ -130,7 +128,7 @@ public class MainActivity extends ActionBarActivity implements
 						mGraphFeature = GraphFeature.PURCHASED;
 					}
 				}
-				mViewPager.getAdapter().notifyDataSetChanged();
+				mViewPager.setAdapter(mPagerAdapter);
 			}
 		});
 	}
@@ -177,7 +175,9 @@ public class MainActivity extends ActionBarActivity implements
 				PURCHASE_GRAPH_FEATURE_REQUEST,
 				new OnProductPurchasedListener() {
 					@Override
-					public void onError(BillingError error) {}
+					public void onError(BillingError error) {
+						Log.w("BillingError", error.name());
+					}
 
 					@Override
 					public void onProductPurchased(Purchase purchase) {
@@ -185,7 +185,7 @@ public class MainActivity extends ActionBarActivity implements
 							if (purchase.getProductId()
 									.equals(GraphFeature.SKU)) {
 								mGraphFeature = GraphFeature.PURCHASED;
-								mViewPager.getAdapter().notifyDataSetChanged();
+								mViewPager.setAdapter(mPagerAdapter);
 							}
 						}
 					}
