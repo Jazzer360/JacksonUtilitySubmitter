@@ -1,5 +1,6 @@
 package com.derekjass.jacksonutilitysubmitter;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -36,7 +37,9 @@ public class MainActivity extends ActionBarActivity implements
 			case HISTORY_TAB:
 				return new HistoryFragment();
 			case GRAPH_TAB:
-				mGraphFeatureFragment = GraphFeatureFragment.newInstance();
+				if (mGraphFeatureFragment == null) {
+					mGraphFeatureFragment = GraphFeatureFragment.newInstance();
+				}
 				return mGraphFeatureFragment;
 			default:
 				throw new IllegalArgumentException(
@@ -113,9 +116,12 @@ public class MainActivity extends ActionBarActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == PURCHASE_GRAPH_FEATURE_REQUEST) {
-			mGraphFeatureFragment.onActivityResult(requestCode, resultCode,
-					data);
+		if (resultCode == Activity.RESULT_OK) {
+			switch (requestCode) {
+			case PURCHASE_GRAPH_FEATURE_REQUEST:
+				mGraphFeatureFragment.handleActivityResult(data);
+				break;
+			}
 		}
 	}
 
