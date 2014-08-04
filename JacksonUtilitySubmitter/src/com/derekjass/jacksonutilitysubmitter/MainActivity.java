@@ -1,7 +1,5 @@
 package com.derekjass.jacksonutilitysubmitter;
 
-import java.util.List;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -14,20 +12,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.derekjass.iabhelper.BillingHelper;
-import com.derekjass.iabhelper.BillingHelper.BillingError;
-import com.derekjass.iabhelper.BillingHelper.OnProductPurchasedListener;
-import com.derekjass.iabhelper.BillingHelper.OnPurchasesQueriedListener;
-import com.derekjass.iabhelper.Purchase;
-import com.derekjass.jacksonutilitysubmitter.PurchaseGraphFragment.GraphPurchasingAgent;
-
 public class MainActivity extends ActionBarActivity implements
-		ActionBar.TabListener, GraphPurchasingAgent {
+		ActionBar.TabListener {
 
 	private class MyPageAdapter extends FragmentStatePagerAdapter {
 		private static final int SUBMIT_TAB = 0;
@@ -46,7 +36,8 @@ public class MainActivity extends ActionBarActivity implements
 			case HISTORY_TAB:
 				return new HistoryFragment();
 			case GRAPH_TAB:
-				return getGraphFragment();
+				mGraphFeatureFragment = GraphFeatureFragment.newInstance();
+				return mGraphFeatureFragment;
 			default:
 				throw new IllegalArgumentException(
 						"No page fragment for positon " + index);
@@ -59,17 +50,11 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 
-	private enum GraphFeature {
-		PURCHASED, NOT_PURCHASED, UNKNOWN;
-		public static final String SKU = "history_feature";
-	}
+	public static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
 
-	private static final int PURCHASE_GRAPH_FEATURE_REQUEST = 0;
-
-	private GraphFeature mGraphFeature = GraphFeature.UNKNOWN;
-	private BillingHelper mBillingHelper;
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
+	private GraphFeatureFragment mGraphFeatureFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,37 +91,6 @@ public class MainActivity extends ActionBarActivity implements
 
 		sendBroadcast(new Intent(this, SetAlarmReceiver.class));
 
-		mBillingHelper = BillingHelper.newManagedProductHelper(this);
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		mBillingHelper.connect();
-		mBillingHelper.queryPurchases(new OnPurchasesQueriedListener() {
-			@Override
-			public void onError(BillingError error) {
-				Log.w("BillingError", error.name());
-			}
-
-			@Override
-			public void onPurchasesQueried(List<Purchase> purchases) {
-				mGraphFeature = GraphFeature.NOT_PURCHASED;
-				for (Purchase purchase : purchases) {
-					if (purchase.isPurchased()
-							&& purchase.getProductId().equals(GraphFeature.SKU)) {
-						mGraphFeature = GraphFeature.PURCHASED;
-					}
-				}
-				mViewPager.setAdapter(mPagerAdapter);
-			}
-		});
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		mBillingHelper.disconnect();
 	}
 
 	@Override
@@ -157,45 +111,11 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 
-	private Fragment getGraphFragment() {
-		switch (mGraphFeature) {
-		case NOT_PURCHASED:
-			return new PurchaseGraphFragment();
-		case PURCHASED:
-			return new GraphFragment();
-		case UNKNOWN:
-		default:
-			return new Fragment();
-		}
-	}
-
-	@Override
-	public void purchaseGraph() {
-		mBillingHelper.purchaseProduct(GraphFeature.SKU, null, this,
-				PURCHASE_GRAPH_FEATURE_REQUEST,
-				new OnProductPurchasedListener() {
-					@Override
-					public void onError(BillingError error) {
-						Log.w("BillingError", error.name());
-					}
-
-					@Override
-					public void onProductPurchased(Purchase purchase) {
-						if (purchase.isPurchased()) {
-							if (purchase.getProductId()
-									.equals(GraphFeature.SKU)) {
-								mGraphFeature = GraphFeature.PURCHASED;
-								mViewPager.setAdapter(mPagerAdapter);
-							}
-						}
-					}
-				});
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == PURCHASE_GRAPH_FEATURE_REQUEST) {
-			mBillingHelper.handleActivityResult(requestCode, resultCode, data);
+			mGraphFeatureFragment.onActivityResult(requestCode, resultCode,
+					data);
 		}
 	}
 
