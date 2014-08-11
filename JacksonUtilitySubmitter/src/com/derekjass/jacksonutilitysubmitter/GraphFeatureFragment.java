@@ -13,6 +13,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -146,7 +147,6 @@ public class GraphFeatureFragment extends PurchaseStateUiFragment {
 	}
 
 	public static class PurchaseGraphFragment extends Fragment {
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -170,6 +170,8 @@ public class GraphFeatureFragment extends PurchaseStateUiFragment {
 		}
 	}
 
+	private static final String TAG = "GraphFeatureFragment";
+
 	@Override
 	protected Fragment getFragmentForState(PurchaseState state) {
 		switch (state) {
@@ -183,7 +185,9 @@ public class GraphFeatureFragment extends PurchaseStateUiFragment {
 	}
 
 	@Override
-	protected void onBillingError(BillingError error) {}
+	protected void onBillingError(BillingError error) {
+		Log.w(TAG, error.toString());
+	}
 
 	public static GraphFeatureFragment newInstance() {
 		GraphFeatureFragment f = new GraphFeatureFragment();
