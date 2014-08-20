@@ -191,8 +191,7 @@ public class GraphFeatureFragment extends PurchaseStateUiFragment {
 
 	public static GraphFeatureFragment newInstance() {
 		GraphFeatureFragment f = new GraphFeatureFragment();
-		f.setArguments(getArgsBundle("history_feature",
-				ProductType.MANAGED_PRODUCT));
+		f.setArguments(getArgsBundle("history_feature", MANAGED_PRODUCT));
 		return f;
 	}
 }
