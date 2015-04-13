@@ -1,6 +1,7 @@
-*.apk
-*.ap_
-*.dex
-*.class
-bin/
-gen/
+### Android Studio ###
+
+/.gradle
+/.idea
+/build
+*.iml
+local.properties

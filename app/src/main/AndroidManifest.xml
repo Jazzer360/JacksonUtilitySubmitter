@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	package="com.derekjass.jacksonutilitysubmitter">
+
+	<permission
+		android:name="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA"
+		android:protectionLevel="signature" />
+	<permission
+		android:name="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA"
+		android:protectionLevel="signature" />
+
+	<uses-permission android:name="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA" />
+	<uses-permission android:name="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="com.android.vending.BILLING" />
+
+	<application
+		android:allowBackup="true"
+		android:backupAgent=".provider.ReadingsBackupAgent"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+		<meta-data
+			android:name="com.google.android.backup.api_key"
+			android:value="AEdPqrEAAAAIs-wmiBHuLFHrVLV6hPTvjZR9PCTSZ9hI8VdVmw" />
+
+		<activity
+			android:name=".MainActivity"
+			android:label="@string/app_name"
+			android:launchMode="singleTop"
+			android:screenOrientation="portrait" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".SettingsActivity"
+			android:label="@string/settings"
+			android:parentActivityName=".MainActivity"
+			android:screenOrientation="portrait"
+			tools:ignore="UnusedAttribute" >
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".MainActivity" />
+		</activity>
+
+		<receiver android:name=".NotificationReceiver" >
+		</receiver>
+		<receiver android:name=".SetAlarmReceiver" >
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+			</intent-filter>
+		</receiver>
+
+		<service android:name=".BackupService" >
+		</service>
+
+		<provider
+			android:name=".provider.ReadingsProvider"
+			android:authorities="com.derekjass.jacksonutilitysubmitter.provider"
+			android:exported="true"
+			android:readPermission="com.derekjass.jacksonutilitysubmitter.READ_READINGS_DATA"
+			android:writePermission="com.derekjass.jacksonutilitysubmitter.WRITE_READINGS_DATA" >
+		</provider>
+	</application>
+
+</manifest>
