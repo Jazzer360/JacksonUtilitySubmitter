@@ -1,74 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-	<ProgressBar
-		android:id="@+id/progress"
-		android:layout_width="80dp"
-		android:layout_height="80dp"
-		android:layout_gravity="center"
-		android:indeterminate="true" />
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:indeterminate="true" />
 
-	<LinearLayout
-		android:id="@+id/graphs"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="vertical"
-		android:visibility="gone" >
+    <LinearLayout
+        android:id="@+id/graphs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:layout_marginTop="10dp"
-			android:text="@string/graph_electric" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="@string/graph_electric" />
 
-		<com.derekjass.jacksonutilitysubmitter.views.BarGraph
-			android:id="@+id/electricGraph"
-			android:layout_width="wrap_content"
-			android:layout_height="0dp"
-			android:layout_margin="6dp"
-			android:layout_weight="1"
-			app:barColor="#FFBB33"
-			app:barCount="12"
-			app:barDrawable="@drawable/bar" />
+        <com.derekjass.jacksonutilitysubmitter.views.BarGraph
+            android:id="@+id/electricGraph"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="6dp"
+            android:layout_weight="1"
+            app:barColor="#FFBB33"
+            app:barCount="12"
+            app:barDrawable="@drawable/bar" />
 
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:layout_marginTop="10dp"
-			android:text="@string/graph_water" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="@string/graph_water" />
 
-		<com.derekjass.jacksonutilitysubmitter.views.BarGraph
-			android:id="@+id/waterGraph"
-			android:layout_width="wrap_content"
-			android:layout_height="0dp"
-			android:layout_margin="6dp"
-			android:layout_weight="1"
-			app:barColor="#33B5E5"
-			app:barCount="12"
-			app:barDrawable="@drawable/bar" />
+        <com.derekjass.jacksonutilitysubmitter.views.BarGraph
+            android:id="@+id/waterGraph"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="6dp"
+            android:layout_weight="1"
+            app:barColor="#33B5E5"
+            app:barCount="12"
+            app:barDrawable="@drawable/bar" />
 
-		<TextView
-			android:id="@+id/gasText"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:layout_marginTop="10dp"
-			android:text="@string/graph_gas" />
+        <TextView
+            android:id="@+id/gasText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="@string/graph_gas" />
 
-		<com.derekjass.jacksonutilitysubmitter.views.BarGraph
-			android:id="@+id/gasGraph"
-			android:layout_width="wrap_content"
-			android:layout_height="0dp"
-			android:layout_margin="6dp"
-			android:layout_weight="1"
-			app:barColor="#99CC00"
-			app:barCount="12"
-			app:barDrawable="@drawable/bar" />
-	</LinearLayout>
+        <com.derekjass.jacksonutilitysubmitter.views.BarGraph
+            android:id="@+id/gasGraph"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="6dp"
+            android:layout_weight="1"
+            app:barColor="#99CC00"
+            app:barCount="12"
+            app:barDrawable="@drawable/bar" />
+    </LinearLayout>
 
 </FrameLayout>
