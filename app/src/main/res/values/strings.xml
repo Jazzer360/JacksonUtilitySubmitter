@@ -26,14 +26,6 @@
 	<string name="graph_electric">Electricity</string>
 	<string name="graph_water">Water</string>
 	<string name="graph_gas">Gas</string>
-	<string name="feature_description">
-<![CDATA[
-		<h1>Purchase feature?</h1>
-		<p>This feature unlocks the ability to view your historical meter
-		readings in a set of bar graphs.</p>
-		]]>
-	</string>
-	<string name="purchase">Purchase</string>
 	<string name="no_data">No readings saved yet</string>
 	<string name="add_history">Add history</string>
 	<string name="edit_history">Edit history</string>

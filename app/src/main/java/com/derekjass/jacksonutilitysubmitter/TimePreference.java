@@ -28,6 +28,7 @@ public class TimePreference extends DialogPreference {
 		setNegativeButtonText(android.R.string.cancel);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onBindDialogView(@NonNull View v) {
 		super.onBindDialogView(v);
@@ -39,6 +40,7 @@ public class TimePreference extends DialogPreference {
 		mPicker.setCurrentMinute(mTime % 60);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
 		if (positiveResult) {

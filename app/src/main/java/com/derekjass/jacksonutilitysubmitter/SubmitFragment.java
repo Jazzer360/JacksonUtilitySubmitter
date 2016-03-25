@@ -1,7 +1,5 @@
 package com.derekjass.jacksonutilitysubmitter;
 
-import java.util.List;
-
 import android.app.backup.BackupManager;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -22,154 +20,156 @@ import android.widget.Toast;
 
 import com.derekjass.jacksonutilitysubmitter.provider.ReadingsContract.Readings;
 
+import java.util.List;
+
 public class SubmitFragment extends Fragment
-implements OnClickListener {
+        implements OnClickListener {
 
-	private EditText mNameText;
-	private EditText mAddressText;
-	private EditText mElectricText;
-	private EditText mWaterText;
-	private View mGasViews;
-	private EditText mGasText;
+    private EditText mNameText;
+    private EditText mAddressText;
+    private EditText mElectricText;
+    private EditText mWaterText;
+    private View mGasViews;
+    private EditText mGasText;
 
-	private SharedPreferences mPrefs;
+    private SharedPreferences mPrefs;
 
-	private BackupManager mBackupManager;
+    private BackupManager mBackupManager;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		mBackupManager = new BackupManager(getActivity());
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mBackupManager = new BackupManager(getActivity());
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View view = inflater.inflate(
-				R.layout.fragment_submit, container, false);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(
+                R.layout.fragment_submit, container, false);
 
-		mNameText = (EditText) view.findViewById(R.id.nameEditText);
-		mAddressText = (EditText) view.findViewById(R.id.addressEditText);
-		mElectricText = (EditText) view.findViewById(R.id.electricEditText);
-		mWaterText = (EditText) view.findViewById(R.id.waterEditText);
-		mGasViews = view.findViewById(R.id.gasFields);
-		mGasText = (EditText) mGasViews.findViewById(R.id.gasEditText);
+        mNameText = (EditText) view.findViewById(R.id.nameEditText);
+        mAddressText = (EditText) view.findViewById(R.id.addressEditText);
+        mElectricText = (EditText) view.findViewById(R.id.electricEditText);
+        mWaterText = (EditText) view.findViewById(R.id.waterEditText);
+        mGasViews = view.findViewById(R.id.gasFields);
+        mGasText = (EditText) mGasViews.findViewById(R.id.gasEditText);
 
-		view.findViewById(R.id.submitButton).setOnClickListener(this);
+        view.findViewById(R.id.submitButton).setOnClickListener(this);
 
-		String name = mPrefs.getString(
-				getString(R.string.pref_name), null);
-		String address = mPrefs.getString(
-				getString(R.string.pref_address), null);
+        String name = mPrefs.getString(
+                getString(R.string.pref_name), null);
+        String address = mPrefs.getString(
+                getString(R.string.pref_address), null);
 
-		if (!TextUtils.isEmpty(name)) {
-			mNameText.setText(name);
-			mAddressText.requestFocus();
-		}
-		if (!TextUtils.isEmpty(address)) {
-			mAddressText.setText(address);
-			mElectricText.requestFocus();
-		}
+        if (!TextUtils.isEmpty(name)) {
+            mNameText.setText(name);
+            mAddressText.requestFocus();
+        }
+        if (!TextUtils.isEmpty(address)) {
+            mAddressText.setText(address);
+            mElectricText.requestFocus();
+        }
 
-		return view;
-	}
+        return view;
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
+    @Override
+    public void onResume() {
+        super.onResume();
 
-		boolean showGas = mPrefs.getBoolean(
-				getString(R.string.pref_enable_gas), false);
+        boolean showGas = mPrefs.getBoolean(
+                getString(R.string.pref_enable_gas), false);
 
-		if (showGas) {
-			mGasViews.setVisibility(View.VISIBLE);
-		} else {
-			mGasViews.setVisibility(View.GONE);
-		}
-	}
+        if (showGas) {
+            mGasViews.setVisibility(View.VISIBLE);
+        } else {
+            mGasViews.setVisibility(View.GONE);
+        }
+    }
 
-	@Override
-	public void onPause() {
-		super.onPause();
+    @Override
+    public void onPause() {
+        super.onPause();
 
-		SharedPreferences.Editor prefsEditor = mPrefs.edit();
-		prefsEditor.putString(getString(R.string.pref_name),
-				mNameText.getText().toString());
-		prefsEditor.putString(getString(R.string.pref_address),
-				mAddressText.getText().toString());
-		prefsEditor.apply();
-	}
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        prefsEditor.putString(getString(R.string.pref_name),
+                mNameText.getText().toString());
+        prefsEditor.putString(getString(R.string.pref_address),
+                mAddressText.getText().toString());
+        prefsEditor.apply();
+    }
 
-	@Override
-	public void onClick(View v) {
-		new SaveReadingsTask().execute(getContentValues());
-		saveSubmittalTime();
-		getActivity().sendBroadcast(
-				new Intent(getActivity(), SetAlarmReceiver.class));
+    @Override
+    public void onClick(View v) {
+        new SaveReadingsTask().execute(getContentValues());
+        saveSubmittalTime();
+        getActivity().sendBroadcast(
+                new Intent(getActivity(), SetAlarmReceiver.class));
 
-		Intent i = new Intent(Intent.ACTION_SEND);
-		i.setType("message/rfc822");
-		i.putExtra(Intent.EXTRA_EMAIL,
-				new String[]{getString(R.string.email_address)});
-		i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-		i.putExtra(Intent.EXTRA_TEXT, getMessageBody());
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL,
+                new String[]{getString(R.string.email_address)});
+        i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
+        i.putExtra(Intent.EXTRA_TEXT, getMessageBody());
 
-		PackageManager pm = getActivity().getPackageManager();
-		List<ResolveInfo> activities = pm.queryIntentActivities(i, 0);
-		boolean isIntentSafe = activities.size() > 0;
+        PackageManager pm = getActivity().getPackageManager();
+        List<ResolveInfo> activities = pm.queryIntentActivities(i, 0);
+        boolean isIntentSafe = activities.size() > 0;
 
-		if (isIntentSafe) {
-			startActivity(i);
-		} else {
-			Toast.makeText(getActivity(),
-					R.string.error_no_email_client,
-					Toast.LENGTH_SHORT).show();
-		}
-	}
+        if (isIntentSafe) {
+            startActivity(i);
+        } else {
+            Toast.makeText(getActivity(),
+                    R.string.error_no_email_client,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
 
-	private class SaveReadingsTask
-	extends AsyncTask<ContentValues, Void, Void> {
-		@Override
-		protected Void doInBackground(ContentValues... params) {
-			getActivity().getContentResolver().insert(
-					Readings.CONTENT_URI, params[0]);
-			mBackupManager.dataChanged();
-			return null;
-		}
-	}
+    private class SaveReadingsTask
+            extends AsyncTask<ContentValues, Void, Void> {
+        @Override
+        protected Void doInBackground(ContentValues... params) {
+            getActivity().getContentResolver().insert(
+                    Readings.CONTENT_URI, params[0]);
+            mBackupManager.dataChanged();
+            return null;
+        }
+    }
 
-	private String getMessageBody() {
+    private String getMessageBody() {
         return String.valueOf(mNameText.getText()) + "\n" +
                 mAddressText.getText() + "\n\n" +
                 getString(R.string.electric) + " " + mElectricText.getText() + "\n" +
                 getString(R.string.water) + " " + mWaterText.getText();
-	}
+    }
 
-	private void saveSubmittalTime() {
-		SharedPreferences.Editor prefsEditor = mPrefs.edit();
-		prefsEditor.putLong(getString(R.string.pref_last_submit),
-				System.currentTimeMillis());
-		prefsEditor.commit();
-	}
+    private void saveSubmittalTime() {
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        prefsEditor.putLong(getString(R.string.pref_last_submit),
+                System.currentTimeMillis());
+        prefsEditor.apply();
+    }
 
-	private ContentValues getContentValues() {
-		ContentValues vals = new ContentValues();
-		vals.put(Readings.COLUMN_DATE, System.currentTimeMillis());
-		vals.put(Readings.COLUMN_ELECTRIC, getIntFromEditText(mElectricText));
-		vals.put(Readings.COLUMN_WATER, getIntFromEditText(mWaterText));
-		vals.put(Readings.COLUMN_GAS, getIntFromEditText(mGasText));
-		return vals;
-	}
+    private ContentValues getContentValues() {
+        ContentValues vals = new ContentValues();
+        vals.put(Readings.COLUMN_DATE, System.currentTimeMillis());
+        vals.put(Readings.COLUMN_ELECTRIC, getIntFromEditText(mElectricText));
+        vals.put(Readings.COLUMN_WATER, getIntFromEditText(mWaterText));
+        vals.put(Readings.COLUMN_GAS, getIntFromEditText(mGasText));
+        return vals;
+    }
 
-	static int getIntFromEditText(EditText view) {
-		int result = -1;
-		if (TextUtils.isEmpty(view.getText())) return result;
-		try {
-			result = Integer.valueOf(view.getText().toString());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
+    static int getIntFromEditText(EditText view) {
+        int result = -1;
+        if (TextUtils.isEmpty(view.getText())) return result;
+        try {
+            result = Integer.valueOf(view.getText().toString());
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

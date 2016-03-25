@@ -10,28 +10,28 @@ import android.support.v4.app.NotificationCompat;
 
 public class NotificationReceiver extends BroadcastReceiver {
 
-	private static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 1;
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent i = new Intent(context, MainActivity.class);
-		PendingIntent pendingIntent = PendingIntent.getActivity(
-				context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent i = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		NotificationCompat.Builder builder =
-				new NotificationCompat.Builder(context);
-		builder.setSmallIcon(R.drawable.ic_stat_notify);
-		builder.setContentTitle(context.getString(R.string.read_meters));
-		builder.setContentText(context.getString(R.string.notification_body));
-		builder.setDefaults(Notification.DEFAULT_ALL);
-		builder.setContentIntent(pendingIntent);
-		builder.setAutoCancel(true);
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(context);
+        builder.setSmallIcon(R.drawable.ic_stat_notify);
+        builder.setContentTitle(context.getString(R.string.read_meters));
+        builder.setContentText(context.getString(R.string.notification_body));
+        builder.setDefaults(Notification.DEFAULT_ALL);
+        builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(true);
 
-		NotificationManager nManager =
-				(NotificationManager) context.getSystemService(
-						Context.NOTIFICATION_SERVICE);
-		nManager.notify(NOTIFICATION_ID, builder.build());
+        NotificationManager nManager =
+                (NotificationManager) context.getSystemService(
+                        Context.NOTIFICATION_SERVICE);
+        nManager.notify(NOTIFICATION_ID, builder.build());
 
-		context.sendBroadcast(new Intent(context, SetAlarmReceiver.class));
-	}
+        context.sendBroadcast(new Intent(context, SetAlarmReceiver.class));
+    }
 }

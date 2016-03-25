@@ -58,9 +58,6 @@
 			</intent-filter>
 		</receiver>
 
-		<service android:name=".BackupService" >
-		</service>
-
 		<provider
 			android:name=".provider.ReadingsProvider"
 			android:authorities="com.derekjass.jacksonutilitysubmitter.provider"
