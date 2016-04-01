@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:v7support="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/action_new"
         android:icon="@drawable/ic_action_new"
         android:title="@string/add_history"
-        v7support:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
 
 </menu>

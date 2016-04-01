@@ -38,6 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@id/electricFields"
+        android:layout_alignEnd="@id/electricFields"
         android:layout_below="@+id/electricFields">
 
         <TextView
@@ -58,6 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@id/waterFields"
+        android:layout_alignEnd="@id/waterFields"
         android:layout_below="@+id/waterFields">
 
         <TextView
