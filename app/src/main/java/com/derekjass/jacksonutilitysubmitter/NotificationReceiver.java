@@ -29,7 +29,6 @@ public class NotificationReceiver extends BroadcastReceiver {
         builder.setSmallIcon(R.drawable.ic_stat_notify);
         builder.setContentTitle(context.getString(R.string.read_meters));
         builder.setContentText(context.getString(R.string.notification_body));
-        builder.setDefaults(Notification.DEFAULT_ALL);
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
         builder.setSound(ringtone);
