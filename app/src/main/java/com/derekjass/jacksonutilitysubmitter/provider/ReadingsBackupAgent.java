@@ -32,7 +32,7 @@ public class ReadingsBackupAgent extends BackupAgent {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(byteStream);
 
-        assert cursor != null;
+        if (cursor == null) throw new AssertionError();
         int recordCount = cursor.getCount();
         out.writeInt(recordCount);
 

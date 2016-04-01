@@ -150,7 +150,7 @@ public class HistoryFragment extends ListFragment
         private void setupViews() {
             Cursor c = getActivity().getContentResolver()
                     .query(mUri, null, null, null, null);
-            assert c != null;
+            if (c == null) throw new AssertionError();
             int dateCol = c.getColumnIndexOrThrow(Readings.COLUMN_DATE);
             int electricCol = c.getColumnIndexOrThrow(Readings.COLUMN_ELECTRIC);
             int waterCol = c.getColumnIndexOrThrow(Readings.COLUMN_WATER);

@@ -1,7 +1,6 @@
 package com.derekjass.jacksonutilitysubmitter.provider;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -98,7 +97,7 @@ public class ReadingsProvider extends ContentProvider {
                 null,
                 orderBy);
         Context context = getContext();
-        assert context != null;
+        if (context == null) throw new AssertionError();
         c.setNotificationUri(context.getContentResolver(), uri);
         return c;
     }
@@ -140,7 +139,7 @@ public class ReadingsProvider extends ContentProvider {
         if (rowId != -1) {
             Uri matchUri = ContentUris.withAppendedId(uri, rowId);
             Context context = getContext();
-            assert context != null;
+            if (context == null) throw new AssertionError();
             context.getContentResolver().notifyChange(matchUri, null);
             return matchUri;
         } else {
@@ -171,7 +170,7 @@ public class ReadingsProvider extends ContentProvider {
         int rowsDeleted = db.delete(table, where, selectionArgs);
 
         Context context = getContext();
-        assert context != null;
+        if (context == null) throw new AssertionError();
         context.getContentResolver().notifyChange(uri, null);
 
         return rowsDeleted;
@@ -201,7 +200,7 @@ public class ReadingsProvider extends ContentProvider {
         int rowsUpdated = db.update(table, values, where, selectionArgs);
 
         Context context = getContext();
-        assert context != null;
+        if (context == null) throw new AssertionError();
         context.getContentResolver().notifyChange(uri, null);
 
         return rowsUpdated;

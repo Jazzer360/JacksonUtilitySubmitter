@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements
 
         PagerAdapter mPagerAdapter = new MyPageAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
+        if (mViewPager == null) throw new AssertionError();
         mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onPageSelected(int position) {
                 ActionBar actionBar = getSupportActionBar();
-                assert actionBar != null;
+                if (actionBar == null) throw new AssertionError();
                 actionBar.setSelectedNavigationItem(position);
             }
 
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         ActionBar actionBar = getSupportActionBar();
-        assert actionBar != null;
+        if (actionBar == null) throw new AssertionError();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.addTab(actionBar.newTab().setText(getString(R.string.submit))
                 .setTabListener(this));
