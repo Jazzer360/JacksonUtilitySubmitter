@@ -6,7 +6,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 
 public class NotificationReceiver extends BroadcastReceiver {
 
@@ -18,19 +20,25 @@ public class NotificationReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String uriString = prefs.getString(context.getString(R.string.pref_ringtone),
+                "content://settings/system/notification_sound");
+        Uri ringtone = Uri.parse(uriString);
+
+        Notification.Builder builder = new Notification.Builder(context);
         builder.setSmallIcon(R.drawable.ic_stat_notify);
         builder.setContentTitle(context.getString(R.string.read_meters));
         builder.setContentText(context.getString(R.string.notification_body));
         builder.setDefaults(Notification.DEFAULT_ALL);
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
+        builder.setSound(ringtone);
 
         NotificationManager nManager =
                 (NotificationManager) context.getSystemService(
                         Context.NOTIFICATION_SERVICE);
-        nManager.notify(NOTIFICATION_ID, builder.build());
+        //noinspection deprecation
+        nManager.notify(NOTIFICATION_ID, builder.getNotification());
 
         context.sendBroadcast(new Intent(context, SetAlarmReceiver.class));
     }

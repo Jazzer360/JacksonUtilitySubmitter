@@ -65,11 +65,9 @@ public class SubmitFragment extends Fragment
 
         if (!TextUtils.isEmpty(name)) {
             mNameText.setText(name);
-            mAddressText.requestFocus();
         }
         if (!TextUtils.isEmpty(address)) {
             mAddressText.setText(address);
-            mElectricText.requestFocus();
         }
 
         return view;
@@ -126,6 +124,10 @@ public class SubmitFragment extends Fragment
                     R.string.error_no_email_client,
                     Toast.LENGTH_SHORT).show();
         }
+
+        mElectricText.setText("");
+        mWaterText.setText("");
+        mGasText.setText("");
     }
 
     private class SaveReadingsTask

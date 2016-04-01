@@ -32,5 +32,7 @@
     <string name="delete">Delete</string>
     <string name="delete_warning_title">Delete history?</string>
     <string name="delete_warning">This will permanently delete this historial reading entry.</string>
+    <string name="ringtone">Sound</string>
+    <string name="none">None</string>
 
 </resources>
