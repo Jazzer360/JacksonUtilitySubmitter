@@ -1,6 +1,5 @@
 package com.derekjass.jacksonutilitysubmitter;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,7 +16,6 @@ public class SetAlarmReceiver extends BroadcastReceiver {
     private SharedPreferences mPrefs;
     private Context mContext;
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public void onReceive(Context context, Intent intent) {
         this.mContext = context;
@@ -35,7 +33,10 @@ public class SetAlarmReceiver extends BroadcastReceiver {
                 true);
 
         if (notificationsEnabled) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, getAlarmTime(), pi);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP, getAlarmTime(), pi);
             } else {
